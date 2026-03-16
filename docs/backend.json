@@ -1,0 +1,818 @@
+{
+  "entities": {
+    "GigWorker": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "GigWorker",
+      "type": "object",
+      "description": "Represents an individual delivery partner registered with SurakshaPay AI, enabling personalized risk assessment and policy management.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the GigWorker entity."
+        },
+        "externalAuthId": {
+          "type": "string",
+          "description": "Identifier from an external authentication system. This ensures security best practices by not storing sensitive authentication data like passwords directly. (Security Best Practice: No passwords stored here.)"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name of the gig worker."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the gig worker."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the gig worker.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Contact phone number of the gig worker."
+        },
+        "address": {
+          "type": "string",
+          "description": "Primary residential or operational address of the gig worker, used for localized risk assessments."
+        },
+        "deliveryPartnerCategory": {
+          "type": "string",
+          "description": "The specific delivery partner category the gig worker operates in, influencing risk models and policy types.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "onboardingDate": {
+          "type": "string",
+          "description": "Timestamp when the gig worker completed their onboarding process.",
+          "format": "date-time"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates if the gig worker's account is currently active and eligible for policy coverage."
+        },
+        "lastActivityDate": {
+          "type": "string",
+          "description": "Timestamp of the gig worker's last recorded activity in the system.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "externalAuthId",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "deliveryPartnerCategory",
+        "onboardingDate",
+        "isActive"
+      ]
+    },
+    "Location": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Location",
+      "type": "object",
+      "description": "Defines a specific geographical area or zone relevant for hyper-local risk assessment, disruption events, and policy coverage.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Location entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Descriptive name of the location or geographical zone (e.g., 'South Delhi Zone A')."
+        },
+        "coordinates": {
+          "type": "string",
+          "description": "Geographical coordinates representing the location, potentially as a GeoJSON string or delimited coordinates, defining its boundaries."
+        },
+        "description": {
+          "type": "string",
+          "description": "Further description of the location, its characteristics, or significance."
+        },
+        "city": {
+          "type": "string",
+          "description": "City where the location is situated."
+        },
+        "state": {
+          "type": "string",
+          "description": "State where the location is situated."
+        },
+        "country": {
+          "type": "string",
+          "description": "Country where the location is situated."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "coordinates",
+        "city",
+        "state",
+        "country"
+      ]
+    },
+    "RiskProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "RiskProfile",
+      "type": "object",
+      "description": "Stores the dynamic, AI-generated risk assessment specific to a GigWorker, potentially linked to a particular location, used for calculating weekly premiums.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the RiskProfile entity."
+        },
+        "gigWorkerId": {
+          "type": "string",
+          "description": "Reference to the GigWorker this risk profile belongs to. (Relationship: GigWorker 1:N RiskProfile)"
+        },
+        "locationId": {
+          "type": "string",
+          "description": "Reference to the primary Location associated with this risk profile for hyper-local assessment. (Relationship: Location 1:N RiskProfile)"
+        },
+        "riskScore": {
+          "type": "number",
+          "description": "A numerical score (e.g., 0-100) representing the assessed likelihood of income loss due to disruptions for the worker in the given location."
+        },
+        "predictedDisruptionLikelihood": {
+          "type": "string",
+          "description": "A summary or category of predicted disruptions based on AI analysis (e.g., 'High Rain Risk', 'Moderate Pollution Probability')."
+        },
+        "lastCalculatedDate": {
+          "type": "string",
+          "description": "Timestamp when this risk profile was last calculated or updated by the AI engine.",
+          "format": "date-time"
+        },
+        "effectiveDate": {
+          "type": "string",
+          "description": "Timestamp from which this risk profile is considered active and used for policy pricing.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "gigWorkerId",
+        "locationId",
+        "riskScore",
+        "lastCalculatedDate",
+        "effectiveDate"
+      ]
+    },
+    "InsurancePolicy": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InsurancePolicy",
+      "type": "object",
+      "description": "Represents an active weekly insurance coverage plan for a GigWorker, detailing premium, coverage, and status.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the InsurancePolicy entity."
+        },
+        "gigWorkerId": {
+          "type": "string",
+          "description": "Reference to the GigWorker who owns this weekly policy. (Relationship: GigWorker 1:N InsurancePolicy)"
+        },
+        "policyStartDate": {
+          "type": "string",
+          "description": "The start date and time of the weekly policy coverage period.",
+          "format": "date-time"
+        },
+        "policyEndDate": {
+          "type": "string",
+          "description": "The end date and time of the weekly policy coverage period.",
+          "format": "date-time"
+        },
+        "premiumAmount": {
+          "type": "number",
+          "description": "The calculated weekly premium amount required for this policy, based on AI risk assessment."
+        },
+        "coverageAmountPerDay": {
+          "type": "number",
+          "description": "The amount of income insured per day of disruption under this policy."
+        },
+        "coverageAmountTotal": {
+          "type": "number",
+          "description": "The total maximum payout amount possible for the entire weekly policy period."
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status of the insurance policy (e.g., 'Active', 'Lapsed', 'Cancelled', 'PendingPayment').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "paymentDueDate": {
+          "type": "string",
+          "description": "The due date and time for the premium payment for this specific weekly policy.",
+          "format": "date-time"
+        },
+        "isPaid": {
+          "type": "boolean",
+          "description": "Indicates if the premium for this weekly policy has been successfully paid."
+        },
+        "riskProfileId": {
+          "type": "string",
+          "description": "Reference to the RiskProfile used for calculating the premium of this policy. (Relationship: RiskProfile 1:N InsurancePolicy)"
+        },
+        "coveredLocationId": {
+          "type": "string",
+          "description": "Reference to the primary Location covered by this policy, defining the operational zone for which risk is assessed. (Relationship: Location 1:N InsurancePolicy)"
+        }
+      },
+      "required": [
+        "id",
+        "gigWorkerId",
+        "policyStartDate",
+        "policyEndDate",
+        "premiumAmount",
+        "coverageAmountPerDay",
+        "coverageAmountTotal",
+        "status",
+        "paymentDueDate",
+        "isPaid",
+        "riskProfileId",
+        "coveredLocationId"
+      ]
+    },
+    "PremiumPayment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PremiumPayment",
+      "type": "object",
+      "description": "Records individual payments made by a GigWorker for their weekly InsurancePolicy premiums.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PremiumPayment entity."
+        },
+        "policyId": {
+          "type": "string",
+          "description": "Reference to the InsurancePolicy for which this payment was made. (Relationship: InsurancePolicy 1:N PremiumPayment)"
+        },
+        "gigWorkerId": {
+          "type": "string",
+          "description": "Reference to the GigWorker who made the payment. (Relationship: GigWorker 1:N PremiumPayment)"
+        },
+        "amountPaid": {
+          "type": "number",
+          "description": "The actual amount paid for the premium."
+        },
+        "paymentDate": {
+          "type": "string",
+          "description": "Timestamp when the payment was processed by the system.",
+          "format": "date-time"
+        },
+        "transactionId": {
+          "type": "string",
+          "description": "Unique transaction identifier provided by the payment gateway for this payment."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the premium payment transaction (e.g., 'Completed', 'Failed', 'Refunded').",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "policyId",
+        "gigWorkerId",
+        "amountPaid",
+        "paymentDate",
+        "transactionId",
+        "status"
+      ]
+    },
+    "DisruptionEvent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DisruptionEvent",
+      "type": "object",
+      "description": "Records an actual external disruption detected by the system, which can trigger parametric claims.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the DisruptionEvent entity."
+        },
+        "type": {
+          "type": "string",
+          "description": "The broad category of the disruption (e.g., 'Environmental', 'Social').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "subType": {
+          "type": "string",
+          "description": "Specific type of disruption (e.g., 'Extreme Heat', 'Heavy Rain', 'Curfew', 'Strike')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the disruption event, including specific conditions or reasons."
+        },
+        "severity": {
+          "type": "string",
+          "description": "The intensity or impact level of the disruption (e.g., 'Low', 'Medium', 'High', 'Critical').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The start date and time of the disruption event.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The estimated or actual end date and time of the disruption event.",
+          "format": "date-time"
+        },
+        "affectedLocationIds": {
+          "type": "array",
+          "description": "References to Locations affected by this disruption event. (Relationship: Location N:N DisruptionEvent)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "string",
+          "description": "The origin or source of the disruption data (e.g., 'Weather API', 'News Feed', 'Govt Alert')."
+        },
+        "isVerified": {
+          "type": "boolean",
+          "description": "Indicates if the disruption event has been verified by the system or an admin, ensuring data reliability."
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "subType",
+        "description",
+        "severity",
+        "startDate",
+        "affectedLocationIds",
+        "source",
+        "isVerified"
+      ]
+    },
+    "Claim": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Claim",
+      "type": "object",
+      "description": "Represents a request for payout due to income loss, often triggered automatically by a DisruptionEvent.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Claim entity."
+        },
+        "gigWorkerId": {
+          "type": "string",
+          "description": "Reference to the GigWorker who filed the claim. (Relationship: GigWorker 1:N Claim)"
+        },
+        "policyId": {
+          "type": "string",
+          "description": "Reference to the InsurancePolicy under which the claim is made. (Relationship: InsurancePolicy 1:N Claim)"
+        },
+        "disruptionEventId": {
+          "type": "string",
+          "description": "Reference to the DisruptionEvent that triggered this claim. (Relationship: DisruptionEvent 1:N Claim)"
+        },
+        "claimDate": {
+          "type": "string",
+          "description": "Timestamp when the claim was initiated in the system.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status of the claim processing (e.g., 'Initiated', 'Under Review', 'Approved', 'Rejected', 'Fraudulent', 'Paid').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "claimedLostIncomeAmount": {
+          "type": "number",
+          "description": "The initial calculated amount of income lost by the worker during the disruption, as per parametric rules."
+        },
+        "approvedPayoutAmount": {
+          "type": "number",
+          "description": "The final amount approved for payout after review and fraud detection."
+        },
+        "fraudScore": {
+          "type": "number",
+          "description": "A score indicating the likelihood of fraud detected for this claim by the AI fraud detection engine."
+        },
+        "fraudReason": {
+          "type": "string",
+          "description": "Detailed reason if the claim was flagged or rejected due to detected fraud."
+        },
+        "rejectionReason": {
+          "type": "string",
+          "description": "Reason for rejecting the claim if it was not approved."
+        },
+        "isAutomated": {
+          "type": "boolean",
+          "description": "Indicates if the claim was automatically initiated by a parametric trigger rule."
+        },
+        "reviewerId": {
+          "type": "string",
+          "description": "Reference to the AdminUser who manually reviewed the claim, if applicable. (Relationship: AdminUser 1:N Claim)"
+        },
+        "lastUpdatedDate": {
+          "type": "string",
+          "description": "Timestamp of the last update to the claim status or details.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "gigWorkerId",
+        "policyId",
+        "disruptionEventId",
+        "claimDate",
+        "status",
+        "claimedLostIncomeAmount",
+        "isAutomated"
+      ]
+    },
+    "PayoutTransaction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PayoutTransaction",
+      "type": "object",
+      "description": "Records the details of an actual financial payout made to a GigWorker for an approved claim.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PayoutTransaction entity."
+        },
+        "claimId": {
+          "type": "string",
+          "description": "Reference to the Claim for which this payout is processed. (Relationship: Claim 1:N PayoutTransaction)"
+        },
+        "gigWorkerId": {
+          "type": "string",
+          "description": "Reference to the GigWorker receiving the payout. (Relationship: GigWorker 1:N PayoutTransaction)"
+        },
+        "amount": {
+          "type": "number",
+          "description": "The actual amount paid out to the gig worker."
+        },
+        "transactionDate": {
+          "type": "string",
+          "description": "Timestamp when the payout transaction was processed by the payment gateway.",
+          "format": "date-time"
+        },
+        "paymentGatewayTransactionId": {
+          "type": "string",
+          "description": "Unique transaction identifier from the payment gateway for this payout."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the payout transaction (e.g., 'Pending', 'Completed', 'Failed', 'Refunded').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "The method used for the payout (e.g., 'UPI', 'Bank Transfer')."
+        }
+      },
+      "required": [
+        "id",
+        "claimId",
+        "gigWorkerId",
+        "amount",
+        "transactionDate",
+        "paymentGatewayTransactionId",
+        "status",
+        "paymentMethod"
+      ]
+    },
+    "AdminUser": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AdminUser",
+      "type": "object",
+      "description": "Represents an internal administrator or staff user within the SurakshaPay AI system, with roles defining their permissions.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AdminUser entity."
+        },
+        "externalAuthId": {
+          "type": "string",
+          "description": "Identifier from an external authentication system. (Security Best Practice: No passwords stored here.)"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name of the admin user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the admin user."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the admin user.",
+          "format": "email"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role of the admin user within the system, defining their permissions and access levels (e.g., 'Admin', 'Analyst', 'Support').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lastLoginDate": {
+          "type": "string",
+          "description": "Timestamp of the admin user's last successful login.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "externalAuthId",
+        "firstName",
+        "lastName",
+        "email",
+        "role"
+      ]
+    },
+    "ParametricTriggerRule": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ParametricTriggerRule",
+      "type": "object",
+      "description": "Defines the rules and conditions for automatically triggering claims based on detected DisruptionEvents.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ParametricTriggerRule entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "A descriptive name for the trigger rule (e.g., 'Heavy Rain Alert - Food Delivery')."
+        },
+        "disruptionType": {
+          "type": "string",
+          "description": "The type of disruption this rule monitors (e.g., 'Environmental', 'Social').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "disruptionSubType": {
+          "type": "string",
+          "description": "The specific sub-type of disruption (e.g., 'Heavy Rain', 'Curfew') that activates this rule."
+        },
+        "minSeverity": {
+          "type": "string",
+          "description": "The minimum severity level of the disruption event required to trigger a claim (e.g., 'Medium', 'High').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "durationThresholdHours": {
+          "type": "number",
+          "description": "The minimum duration in hours a disruption must continuously last to trigger a claim."
+        },
+        "locationTag": {
+          "type": "string",
+          "description": "A tag or identifier for the type of location this rule applies to (e.g., 'Urban', 'Rural'), allowing for flexible targeting."
+        },
+        "deliveryPartnerCategory": {
+          "type": "string",
+          "description": "The specific delivery partner category this rule applies to (e.g., 'Food', 'E-commerce', 'Grocery', or 'All').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "impactThresholdPercentage": {
+          "type": "number",
+          "description": "The estimated percentage of income loss that, when met, triggers a claim for affected workers."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates if this trigger rule is currently active and monitoring for disruption events."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the trigger rule was created.",
+          "format": "date-time"
+        },
+        "lastModifiedAt": {
+          "type": "string",
+          "description": "Timestamp when the trigger rule was last modified.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "disruptionType",
+        "disruptionSubType",
+        "minSeverity",
+        "durationThresholdHours",
+        "deliveryPartnerCategory",
+        "impactThresholdPercentage",
+        "isActive",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/gigWorkers/{gigWorkerId}",
+        "definition": {
+          "entityName": "GigWorker",
+          "schema": {
+            "$ref": "#/backend/entities/GigWorker"
+          },
+          "description": "Root collection for all gig worker profiles. Document ID (`{gigWorkerId}`) MUST match the user's Firebase Authentication UID (`request.auth.uid`). This structure enables path-based authorization. Includes denormalized 'externalAuthId' for authorization independence.",
+          "params": [
+            {
+              "name": "gigWorkerId",
+              "description": "The Firebase Authentication UID of the gig worker."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/adminUsers/{adminUserId}",
+        "definition": {
+          "entityName": "AdminUser",
+          "schema": {
+            "$ref": "#/backend/entities/AdminUser"
+          },
+          "description": "Collection for internal administrator profiles. Document ID (`{adminUserId}`) MUST match the admin's Firebase Authentication UID. Used for Database Access Control (DBAC) roles.",
+          "params": [
+            {
+              "name": "adminUserId",
+              "description": "The Firebase Authentication UID of the administrator."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/locations/{locationId}",
+        "definition": {
+          "entityName": "Location",
+          "schema": {
+            "$ref": "#/backend/entities/Location"
+          },
+          "description": "System-wide collection for geographical locations relevant for risk assessment and policy coverage. This data is generally public/system-readable but writeable only by administrators.",
+          "params": [
+            {
+              "name": "locationId",
+              "description": "Unique identifier for the location."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/disruptionEvents/{disruptionEventId}",
+        "definition": {
+          "entityName": "DisruptionEvent",
+          "schema": {
+            "$ref": "#/backend/entities/DisruptionEvent"
+          },
+          "description": "System-wide collection for detected external disruption events. This data is generally public/system-readable for context but writeable only by the system or administrators.",
+          "params": [
+            {
+              "name": "disruptionEventId",
+              "description": "Unique identifier for the disruption event."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/parametricTriggerRules/{ruleId}",
+        "definition": {
+          "entityName": "ParametricTriggerRule",
+          "schema": {
+            "$ref": "#/backend/entities/ParametricTriggerRule"
+          },
+          "description": "System-wide collection for parametric rules that automatically trigger claims. This collection is read/write accessible only by administrators.",
+          "params": [
+            {
+              "name": "ruleId",
+              "description": "Unique identifier for the parametric trigger rule."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/gigWorkers/{gigWorkerId}/riskProfiles/{riskProfileId}",
+        "definition": {
+          "entityName": "RiskProfile",
+          "schema": {
+            "$ref": "#/backend/entities/RiskProfile"
+          },
+          "description": "Subcollection for AI-generated risk profiles, specific to each gig worker. Accessible only by the owning gig worker. Includes denormalized 'gigWorkerId' and 'locationId' for authorization independence and query efficiency.",
+          "params": [
+            {
+              "name": "gigWorkerId",
+              "description": "The Firebase Authentication UID of the owning gig worker."
+            },
+            {
+              "name": "riskProfileId",
+              "description": "Unique identifier for the risk profile."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/gigWorkers/{gigWorkerId}/insurancePolicies/{policyId}",
+        "definition": {
+          "entityName": "InsurancePolicy",
+          "schema": {
+            "$ref": "#/backend/entities/InsurancePolicy"
+          },
+          "description": "Subcollection for active weekly insurance policies, owned by a specific gig worker. Accessible only by the owning gig worker. Includes denormalized 'gigWorkerId', 'riskProfileId', and 'coveredLocationId' for authorization independence and query efficiency.",
+          "params": [
+            {
+              "name": "gigWorkerId",
+              "description": "The Firebase Authentication UID of the owning gig worker."
+            },
+            {
+              "name": "policyId",
+              "description": "Unique identifier for the insurance policy."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/gigWorkers/{gigWorkerId}/insurancePolicies/{policyId}/premiumPayments/{paymentId}",
+        "definition": {
+          "entityName": "PremiumPayment",
+          "schema": {
+            "$ref": "#/backend/entities/PremiumPayment"
+          },
+          "description": "Nested subcollection for individual premium payments associated with a specific insurance policy and gig worker. Accessible only by the owning gig worker or authorized administrators. Includes denormalized 'gigWorkerId' and 'policyId' for authorization independence and query efficiency.",
+          "params": [
+            {
+              "name": "gigWorkerId",
+              "description": "The Firebase Authentication UID of the owning gig worker."
+            },
+            {
+              "name": "policyId",
+              "description": "Unique identifier for the parent insurance policy."
+            },
+            {
+              "name": "paymentId",
+              "description": "Unique identifier for the premium payment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/gigWorkers/{gigWorkerId}/claims/{claimId}",
+        "definition": {
+          "entityName": "Claim",
+          "schema": {
+            "$ref": "#/backend/entities/Claim"
+          },
+          "description": "Subcollection for income loss claims, owned by a specific gig worker. Accessible by the owning gig worker and administrators. Includes denormalized 'gigWorkerId', 'policyId', 'disruptionEventId', and 'reviewerId' for authorization independence and query efficiency.",
+          "params": [
+            {
+              "name": "gigWorkerId",
+              "description": "The Firebase Authentication UID of the owning gig worker."
+            },
+            {
+              "name": "claimId",
+              "description": "Unique identifier for the claim."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/gigWorkers/{gigWorkerId}/claims/{claimId}/payoutTransactions/{payoutTransactionId}",
+        "definition": {
+          "entityName": "PayoutTransaction",
+          "schema": {
+            "$ref": "#/backend/entities/PayoutTransaction"
+          },
+          "description": "Nested subcollection for financial payout transactions related to an approved claim, specific to a gig worker. Accessible by the owning gig worker and administrators. Includes denormalized 'gigWorkerId' and 'claimId' for authorization independence and query efficiency.",
+          "params": [
+            {
+              "name": "gigWorkerId",
+              "description": "The Firebase Authentication UID of the owning gig worker."
+            },
+            {
+              "name": "claimId",
+              "description": "Unique identifier for the parent claim."
+            },
+            {
+              "name": "payoutTransactionId",
+              "description": "Unique identifier for the payout transaction."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure prioritizes Authorization Independence and Query-as-Authorization-Policy (QAP) principles, ensuring a robust, secure, and debuggable system for SurakshaPay AI. Each gig worker's data is predominantly isolated within their own subcollections, directly linked to their authenticated UID. \n\n**Authorization Independence (Denormalization Strategy):**\nFor all user-specific subcollections (e.g., `riskProfiles`, `insurancePolicies`, `claims`), the `gigWorkerId` is explicitly included in the document path (e.g., `/gigWorkers/{gigWorkerId}/insurancePolicies/{policyId}`). This design is critical as it eliminates the need for `get()` calls in Firestore Security Rules to check parent document ownership. Rules can simply compare `request.auth.uid` with the `{gigWorkerId}` wildcard in the path, making them atomic, efficient, and easier to debug. Furthermore, key identifiers like `gigWorkerId`, `policyId`, `claimId`, `locationId`, and `disruptionEventId` are denormalized and stored directly within the respective documents where they are relevant. This enables direct, efficient queries and rule evaluation without complex lookups.\n\n**QAPs (Support for Secure List Operations):**\n1.  **Path-Based Ownership:** By structuring user-owned data under `/gigWorkers/{gigWorkerId}/...`, QAPs are naturally supported. When a gig worker queries their own data (e.g., `db.collection('gigWorkers').doc(auth.uid).collection('insurancePolicies')`), the security rules can directly evaluate `request.auth.uid == gigWorkerId` (where `gigWorkerId` is the path wildcard), ensuring that users can only list their own policies, risk profiles, claims, and payments. The client-side query path implicitly provides the necessary authorization context.\n2.  **Structural Segregation:** System-wide collections like `/locations`, `/disruptionEvents`, and `/parametricTriggerRules` are designed with distinct security postures (e.g., read-all for some, admin-only for others). This segregation prevents mixing data with different access requirements, simplifying rules. For instance, `disruptionEvents` can be read publicly by the system (and potentially gig workers for context), while `parametricTriggerRules` are strictly for `adminUsers`.\n3.  **Admin Access:** The `/adminUsers/{adminUserId}` collection stores admin roles. Security rules can check `exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid))` to grant broader access to certain collections (e.g., `claims`, `payoutTransactions`, `parametricTriggerRules`), allowing administrators to manage and audit system data without compromising user data isolation. For instance, an admin can perform collection group queries on `claims` and the rules, combined with the denormalized `gigWorkerId` within the `Claim` document, will allow proper filtering and access while preventing non-admins from doing the same. This also addresses the user request of easily identifying users by name for login/signin issues, as `AdminUser` and `GigWorker` profiles hold this information, queryable by authorized personnel.\n\nOverall, this structure provides a clear separation of concerns, enforces strict ownership, minimizes rule complexity by avoiding `get()` calls, and inherently supports secure `list` operations, aligning with all core design principles and strategy mandates."
+  }
+}

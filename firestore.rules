@@ -1,0 +1,175 @@
+/**
+ * SurakshaPay AI Security Rules
+ * 
+ * Core Philosophy:
+ * This ruleset implements a strict user-ownership model combined with role-based access for 
+ * administrators. It prioritizes "Authorization Independence" by leveraging path-based 
+ * security and denormalized identifiers (like gigWorkerId) to minimize expensive cross-document 
+ * lookups (get() calls).
+ * 
+ * Data Structure:
+ * - /gigWorkers/{gigWorkerId}: Root user profiles where ID matches Firebase Auth UID.
+ * - /gigWorkers/{gigWorkerId}/...: Subcollections (riskProfiles, insurancePolicies, claims) 
+ *   are secured primarily by checking the parent path UID against the authenticated user.
+ * - /adminUsers/{adminUserId}: Directory of administrative staff used to grant elevated 
+ *   permissions for system management and auditing.
+ * - /locations & /disruptionEvents: Publicly readable system-wide data collections.
+ * - /parametricTriggerRules: Admin-only configuration for the AI claim trigger engine.
+ * 
+ * Key Security Decisions:
+ * - Path-based authorization is enforced for all user-specific data to ensure high performance.
+ * - Relational integrity is strictly enforced during creation (ensuring internal IDs match paths).
+ * - Administrative access is granted based on the existence of a document in the /adminUsers collection.
+ * - Destructive operations (delete) are generally disabled for financial and insurance records 
+ *   to maintain audit trails.
+ * 
+ * Denormalization for Authorization:
+ * This system denormalizes 'gigWorkerId' into all sub-documents. While path-based security 
+ * handles most user requests, these fields allow Administrators to perform Collection Group 
+ * queries securely while ensuring the results are restricted to valid user-linked data.
+ */
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Helper Functions ---
+
+    /** @description Checks if the user is authenticated. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** @description Checks if the authenticated user's UID matches the provided userId. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** @description Checks if the user is an owner and the document exists for updates/deletes. */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /** @description Checks if the authenticated user is registered as an administrator. */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+
+    /** @description Validates relational integrity: internal ID must match the path ID on create. */
+    function matchesPath(field, pathId) {
+      return request.resource.data[field] == pathId;
+    }
+
+    /** @description Validates relational integrity: internal ID cannot be changed on update. */
+    function isImmutable(field) {
+      return request.resource.data[field] == resource.data[field];
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for GigWorker profiles. Users manage their own profile; admins can audit.
+     * @path /gigWorkers/{gigWorkerId}
+     * @allow (get) If user is owner or admin.
+     * @deny (create) If request.auth.uid does not match the document ID.
+     * @principle Self-creation and ownership-based access.
+     */
+    match /gigWorkers/{gigWorkerId} {
+      allow get: if isOwner(gigWorkerId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(gigWorkerId) && matchesPath('id', gigWorkerId);
+      allow update: if isExistingOwner(gigWorkerId) && isImmutable('id');
+      allow delete: if false; // Profiles are deactivated via 'isActive' flag, not deleted.
+
+      /**
+       * @description AI-generated risk profiles for a worker. Owner only read/create.
+       * @path /gigWorkers/{gigWorkerId}/riskProfiles/{riskProfileId}
+       * @allow (list) If user is the gigWorkerId in the path.
+       * @deny (update) If user is not an admin (Risk profiles are system-generated).
+       */
+      match /riskProfiles/{riskProfileId} {
+        allow get, list: if isOwner(gigWorkerId) || isAdmin();
+        allow create: if isOwner(gigWorkerId) && matchesPath('gigWorkerId', gigWorkerId);
+        allow update, delete: if isAdmin();
+      }
+
+      /**
+       * @description Weekly insurance policies owned by a worker.
+       * @path /gigWorkers/{gigWorkerId}/insurancePolicies/{policyId}
+       */
+      match /insurancePolicies/{policyId} {
+        allow get, list: if isOwner(gigWorkerId) || isAdmin();
+        allow create: if isOwner(gigWorkerId) && matchesPath('gigWorkerId', gigWorkerId);
+        allow update: if (isExistingOwner(gigWorkerId) || isAdmin()) && isImmutable('gigWorkerId');
+        allow delete: if false;
+
+        /**
+         * @description Premium payments linked to a specific policy.
+         */
+        match /premiumPayments/{paymentId} {
+          allow get, list: if isOwner(gigWorkerId) || isAdmin();
+          allow create: if isOwner(gigWorkerId) && matchesPath('gigWorkerId', gigWorkerId);
+          allow update, delete: if false; // Payments are immutable financial records.
+        }
+      }
+
+      /**
+       * @description Income loss claims filed by or for a worker.
+       * @path /gigWorkers/{gigWorkerId}/claims/{claimId}
+       */
+      match /claims/{claimId} {
+        allow get, list: if isOwner(gigWorkerId) || isAdmin();
+        allow create: if isOwner(gigWorkerId) && matchesPath('gigWorkerId', gigWorkerId);
+        allow update: if (isExistingOwner(gigWorkerId) || isAdmin()) && isImmutable('gigWorkerId');
+        allow delete: if false;
+
+        /**
+         * @description Financial payouts for approved claims.
+         */
+        match /payoutTransactions/{payoutTransactionId} {
+          allow get, list: if isOwner(gigWorkerId) || isAdmin();
+          allow create: if isAdmin(); // Only system/admin can record a payout.
+          allow update, delete: if false;
+        }
+      }
+    }
+
+    /**
+     * @description Administrator profiles. Admins manage their own identity; used for RBAC.
+     * @path /adminUsers/{adminUserId}
+     */
+    match /adminUsers/{adminUserId} {
+      allow get: if isOwner(adminUserId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(adminUserId);
+      allow update: if isExistingOwner(adminUserId);
+      allow delete: if false;
+    }
+
+    /**
+     * @description System-wide geographical zones. Public read, admin write.
+     * @path /locations/{locationId}
+     */
+    match /locations/{locationId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description External disruption events (e.g., weather). Public read, admin write.
+     * @path /disruptionEvents/{disruptionEventId}
+     */
+    match /disruptionEvents/{disruptionEventId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Rules for the parametric claim trigger engine. Restricted to admins.
+     * @path /parametricTriggerRules/{ruleId}
+     */
+    match /parametricTriggerRules/{ruleId} {
+      allow get, list, create, update, delete: if isAdmin();
+    }
+  }
+}

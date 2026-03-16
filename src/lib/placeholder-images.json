@@ -1,0 +1,28 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-delivery",
+      "description": "A happy delivery partner with a bike and helmet",
+      "imageUrl": "https://picsum.photos/seed/delivery1/800/600",
+      "imageHint": "delivery worker"
+    },
+    {
+      "id": "food-delivery",
+      "description": "Zomato/Swiggy style food delivery",
+      "imageUrl": "https://picsum.photos/seed/food1/400/300",
+      "imageHint": "food delivery"
+    },
+    {
+      "id": "grocery-delivery",
+      "description": "Blinkit/Zepto style grocery delivery",
+      "imageUrl": "https://picsum.photos/seed/grocery1/400/300",
+      "imageHint": "grocery bags"
+    },
+    {
+      "id": "ecommerce-delivery",
+      "description": "Amazon/Flipkart style package delivery",
+      "imageUrl": "https://picsum.photos/seed/pkg1/400/300",
+      "imageHint": "package delivery"
+    }
+  ]
+}

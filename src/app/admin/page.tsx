@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Shield, Users, CloudRain, BarChart3, AlertTriangle, TrendingUp, IndianRupee, MapPin, Zap, Loader2, ThermometerSun, BrainCircuit, Activity } from 'lucide-react';
+import { Shield, Users, CloudRain, BarChart3, AlertTriangle, TrendingUp, IndianRupee, MapPin, Zap, Loader2, ThermometerSun, BrainCircuit, Activity, LogOut } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Area, AreaChart, PieChart, Pie, Cell } from 'recharts';
 import { simulateParametricTrigger } from '@/lib/parametric-engine';
@@ -18,8 +19,36 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function AdminPage() {
+  const router = useRouter();
   const { toast } = useToast();
   const [isSimulating, setIsSimulating] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [adminUser, setAdminUser] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('surakshapay_adminToken');
+    const user = localStorage.getItem('surakshapay_adminUser');
+    if (!token) {
+      router.replace('/admin/login');
+    } else {
+      setIsAuthed(true);
+      setAdminUser(user || 'Admin');
+    }
+  }, [router]);
+
+  const handleSignOut = () => {
+    localStorage.removeItem('surakshapay_adminToken');
+    localStorage.removeItem('surakshapay_adminUser');
+    router.replace('/admin/login');
+  };
+
+  if (!isAuthed) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   const handleTriggerSimulation = async (type: 'Rain' | 'Heat') => {
     setIsSimulating(true);
@@ -93,7 +122,7 @@ export default function AdminPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-4xl font-black font-headline text-primary tracking-tight">Insurer Analytics</h1>
-          <p className="text-muted-foreground text-lg">Predictive Risk & Parametric Oversight Dashboard</p>
+          <p className="text-muted-foreground text-lg">Welcome, <span className="font-bold text-primary">{adminUser}</span> — Predictive Risk & Parametric Oversight Dashboard</p>
         </div>
         <div className="flex gap-4">
           <div className="flex gap-2 bg-white/50 border p-1.5 rounded-2xl shadow-sm">
@@ -117,6 +146,14 @@ export default function AdminPage() {
               Heat Trigger
             </Button>
           </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="rounded-xl gap-2 text-muted-foreground hover:text-red-600"
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-4 w-4" /> Sign Out
+          </Button>
         </div>
       </div>
 

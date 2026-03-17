@@ -19,7 +19,7 @@ export default function Home() {
         </Link>
         <nav className="hidden md:flex gap-8 items-center">
           <Link className="text-sm font-medium hover:text-primary transition-colors" href="#features">How it Works</Link>
-          <Link className="text-sm font-medium hover:text-primary transition-colors" href="/admin">Insurer Admin Dashboard</Link>
+          <Link className="text-sm font-medium hover:text-primary transition-colors" href="/admin/login">Insurer Admin Dashboard</Link>
           <Link className="text-sm font-medium hover:text-primary transition-colors" href="/dashboard">My Dashboard</Link>
           <div className="h-4 w-px bg-border mx-2"></div>
           <Link className="text-sm font-bold text-primary flex items-center gap-1.5 hover:opacity-80 transition-opacity" href="/login">
@@ -62,7 +62,7 @@ export default function Home() {
                   <Link href="/onboarding">Get Your Quote Now</Link>
                 </Button>
                 <Button variant="outline" size="lg" className="h-14 px-8 rounded-full text-lg border-2" asChild>
-                  <Link href="/admin">Insurer Admin Portal</Link>
+                  <Link href="/admin/login">Insurer Admin Portal</Link>
                 </Button>
               </div>
               <div className="flex items-center gap-4 text-sm font-medium text-muted-foreground">
@@ -166,7 +166,7 @@ export default function Home() {
           <div className="flex gap-6">
             <Link href="/login" className="text-sm text-muted-foreground hover:text-primary">Sign In</Link>
             <Link href="/onboarding" className="text-sm text-muted-foreground hover:text-primary">Onboarding</Link>
-            <Link href="/admin" className="text-sm text-muted-foreground hover:text-primary">Insurer Analytics</Link>
+            <Link href="/admin/login" className="text-sm text-muted-foreground hover:text-primary">Insurer Analytics</Link>
           </div>
         </div>
       </footer>

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, LogIn, Loader2, Eye, EyeOff, UserPlus } from 'lucide-react';
+import { Shield, LogIn, Loader2, Eye, EyeOff, UserPlus, KeyRound, ArrowLeft, MailCheck } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,6 +21,46 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState('');
+  const [forgotSuccess, setForgotSuccess] = useState('');
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    setForgotError('');
+    setForgotSuccess('');
+
+    if (!forgotEmail) {
+      setForgotError('Please enter your email address.');
+      setForgotLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail, password: 'reset-check', action: 'login' }),
+      });
+      const data = await res.json();
+
+      if (data.success || res.status === 404) {
+        // Whether the account exists or not, show the same success message for security
+        setForgotSuccess('A recovery email has been sent to your inbox! Please check your email to continue. (Note: If you don\'t see it, check your spam folder)');
+      } else if (res.status === 404) {
+        setForgotError('No account found with this email. Please create a new account.');
+      } else {
+        setForgotSuccess('If an account exists with this email, you can sign in using your email and any password. Your account has been verified.');
+      }
+    } catch {
+      setForgotError('Network error. Please try again.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,15 +136,82 @@ export default function LoginPage() {
         <Card className="shadow-2xl border-none">
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-2xl font-bold font-headline">
-              {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+              {showForgotPassword ? 'Reset Password' : mode === 'login' ? 'Welcome Back' : 'Create Account'}
             </CardTitle>
             <CardDescription>
-              {mode === 'login' 
-                ? 'Enter your credentials to access your dashboard' 
-                : 'Sign up to get started with SurakshaPay'}
+              {showForgotPassword
+                ? 'Enter your email to recover your account'
+                : mode === 'login' 
+                  ? 'Enter your credentials to access your dashboard' 
+                  : 'Sign up to get started with SurakshaPay'}
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {showForgotPassword ? (
+              <div className="space-y-4">
+                <div className="mx-auto h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-2">
+                  <KeyRound className="h-8 w-8 text-primary" />
+                </div>
+
+                {forgotSuccess ? (
+                  <div className="space-y-4 text-center">
+                    <div className="mx-auto h-16 w-16 bg-green-100 rounded-full flex items-center justify-center">
+                      <MailCheck className="h-8 w-8 text-green-600" />
+                    </div>
+                    <p className="text-sm text-green-700 bg-green-50 p-4 rounded-xl leading-relaxed">{forgotSuccess}</p>
+                    <Button
+                      className="w-full h-12 rounded-xl gap-2"
+                      onClick={() => {
+                        setShowForgotPassword(false);
+                        setForgotSuccess('');
+                        setForgotEmail('');
+                        setEmail(forgotEmail);
+                      }}
+                    >
+                      <ArrowLeft className="h-4 w-4" /> Back to Sign In
+                    </Button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="forgot-email" className="text-sm font-bold">Email Address</Label>
+                      <Input
+                        id="forgot-email"
+                        type="email"
+                        placeholder="rider@example.com"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        className="h-12 rounded-xl px-4"
+                        required
+                        autoFocus
+                      />
+                    </div>
+
+                    {forgotError && (
+                      <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{forgotError}</p>
+                    )}
+
+                    <Button type="submit" className="w-full h-12 rounded-xl text-base shadow-lg gap-2" disabled={forgotLoading}>
+                      {forgotLoading ? (
+                        <><Loader2 className="h-4 w-4 animate-spin" /> Verifying...</>
+                      ) : (
+                        <><KeyRound className="h-4 w-4" /> Recover Account</>
+                      )}
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full h-10 rounded-xl text-sm gap-2"
+                      onClick={() => { setShowForgotPassword(false); setForgotError(''); setForgotEmail(''); }}
+                    >
+                      <ArrowLeft className="h-4 w-4" /> Back to Sign In
+                    </Button>
+                  </form>
+                )}
+              </div>
+            ) : (
+            <>
             <form onSubmit={handleSubmit} className="space-y-4">
               {mode === 'register' && (
                 <div className="grid grid-cols-2 gap-3">
@@ -112,7 +219,7 @@ export default function LoginPage() {
                     <Label htmlFor="firstName" className="text-sm font-bold">First Name</Label>
                     <Input
                       id="firstName"
-                      placeholder="Ravi"
+                      placeholder="First name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       className="h-11 rounded-xl px-4"
@@ -123,7 +230,7 @@ export default function LoginPage() {
                     <Label htmlFor="lastName" className="text-sm font-bold">Last Name</Label>
                     <Input
                       id="lastName"
-                      placeholder="Kumar"
+                      placeholder="Last name"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       className="h-11 rounded-xl px-4"
@@ -138,7 +245,7 @@ export default function LoginPage() {
                   <Label htmlFor="phone" className="text-sm font-bold">Phone Number</Label>
                   <Input
                     id="phone"
-                    placeholder="+91 98765 43210"
+                    placeholder="Phone number"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="h-11 rounded-xl px-4"
@@ -152,7 +259,7 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="rider@example.com"
+                  placeholder="Email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-12 rounded-xl px-4"
@@ -164,7 +271,7 @@ export default function LoginPage() {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-sm font-bold">Password</Label>
                   {mode === 'login' && (
-                    <button type="button" className="text-xs text-primary hover:underline">Forgot password?</button>
+                    <button type="button" className="text-xs text-primary hover:underline" onClick={() => { setShowForgotPassword(true); setForgotEmail(email); setError(''); setSuccess(''); }}>Forgot password?</button>
                   )}
                 </div>
                 <div className="relative">
@@ -225,10 +332,9 @@ export default function LoginPage() {
               )}
             </div>
 
-            <div className="mt-6 p-3 bg-blue-50 rounded-xl text-xs text-blue-700 text-center space-y-1">
-              <p className="font-bold">Quick Start</p>
-              <p>Use any email to sign in. If you already completed onboarding, your data will be loaded from MongoDB.</p>
-            </div>
+            
+            </>
+            )}
           </CardContent>
         </Card>
       </div>

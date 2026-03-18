@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import GigWorker from '@/models/GigWorker';
+import { sendRecoveryEmail } from '@/lib/resend';
 
 /**
  * POST /api/auth
@@ -59,6 +60,17 @@ export async function POST(request: Request) {
 
     // Login: find existing worker by email
     const worker = await GigWorker.findOne({ email });
+
+    // Handle recovery simulation/trigger from frontend
+    if (password === 'reset-check') {
+      if (worker) {
+        await sendRecoveryEmail(email, worker.firstName);
+      }
+      return NextResponse.json({
+        success: true,
+        message: 'Recovery email sent (simulated if no API key)',
+      });
+    }
 
     if (!worker) {
       return NextResponse.json(

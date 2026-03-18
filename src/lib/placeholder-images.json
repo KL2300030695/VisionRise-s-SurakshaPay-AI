@@ -2,26 +2,26 @@
   "placeholderImages": [
     {
       "id": "hero-delivery",
-      "description": "A happy delivery partner with a bike and helmet",
-      "imageUrl": "https://picsum.photos/seed/delivery1/800/600",
-      "imageHint": "delivery worker"
+      "description": "Premium cinematic shot of Indian delivery rider in monsoon rain",
+      "imageUrl": "/images/hero-delivery.png",
+      "imageHint": "premium delivery rider in rain"
     },
     {
       "id": "food-delivery",
-      "description": "Zomato/Swiggy style food delivery",
-      "imageUrl": "https://picsum.photos/seed/food1/400/300",
-      "imageHint": "food delivery"
+      "description": "Close-up of food delivery bag in rain",
+      "imageUrl": "/images/food-delivery.png",
+      "imageHint": "food delivery bag"
     },
     {
       "id": "grocery-delivery",
-      "description": "Blinkit/Zepto style grocery delivery",
-      "imageUrl": "https://picsum.photos/seed/grocery1/400/300",
-      "imageHint": "grocery bags"
+      "description": "Fresh grocery bags handed over at doorstep",
+      "imageUrl": "/images/grocery-delivery.png",
+      "imageHint": "grocery delivery"
     },
     {
       "id": "ecommerce-delivery",
-      "description": "Amazon/Flipkart style package delivery",
-      "imageUrl": "https://picsum.photos/seed/pkg1/400/300",
+      "description": "Professional package delivery in India",
+      "imageUrl": "/images/ecommerce-delivery.png",
       "imageHint": "package delivery"
     }
   ]

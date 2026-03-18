@@ -43,6 +43,30 @@ SurakshaPay AI provides a **weekly, parametric income protection layer**. Unlike
 
 ---
 
+## 👤 Persona-Based Scenarios
+
+### Scenario 1: The Foodie in Mumbai (Zomato/Swiggy)
+**Rahul** delivers food in Mumbai. During the monsoon, a sudden heavy rainstorm (>15mm/hr) causes severe waterlogging, making it impossible for him to ride for 4 hours.
+- **SurakshaPay Action**: Parametric trigger detects "Heavy Rain" in Mumbai.
+- **Result**: ₹500 is instantly credited to Rahul's UPI wallet for lost income, no claim form needed.
+
+### Scenario 2: The Grocery Hero in Delhi (Zepto/Blinkit)
+**Amit** works for Zepto in Delhi. A severe heatwave hits, with temperatures crossing 45°C. For safety, Amit stops working during the peak afternoon hours (12 PM - 4 PM).
+- **SurakshaPay Action**: Parametric trigger detects "Extreme Heat" (>42°C).
+- **Result**: Amit receives a notification and a ₹500 payout, protecting his daily wage.
+
+---
+
+## 📱 Platform Choice: Why Web?
+
+For the Guidewire DEVTrails 2026, we have chosen a **Responsive Web App (Next.js)** for the following reasons:
+1. **Zero Friction**: Gig workers don't need to download another heavy app. They can access SurakshaPay instantly via a link shared by their platform partner.
+2. **Speed of Deployment**: Next.js allows for rapid iteration and seamless integration with Guidewire's cloud-native APIs.
+3. **Cross-Platform**: Works perfectly on both Android (most common for riders) and iOS without separate codebases.
+4. **Integration Ready**: Easy to embed as a "Micro-App" within existing platform partner apps (like Zomato/Swiggy rider apps).
+
+---
+
 ## 🔄 End-to-End Workflow
 
 ```

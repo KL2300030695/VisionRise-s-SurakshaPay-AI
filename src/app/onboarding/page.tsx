@@ -188,20 +188,20 @@ export default function OnboardingPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="font-bold text-xs">First Name</Label>
-                  <Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Ravi" className="h-12 rounded-xl" required />
+                  <Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First name" className="h-12 rounded-xl" required />
                 </div>
                 <div className="space-y-2">
                   <Label className="font-bold text-xs">Last Name</Label>
-                  <Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Kumar" className="h-12 rounded-xl" required />
+                  <Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last name" className="h-12 rounded-xl" required />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label className="font-bold text-xs">Phone Number</Label>
-                <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 98765 43210" className="h-12 rounded-xl" required />
+                <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone number" className="h-12 rounded-xl" required />
               </div>
               <div className="space-y-2">
                 <Label className="font-bold text-xs">Email</Label>
-                <Input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="ravi@email.com" className="h-12 rounded-xl" required />
+                <Input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="Email address" className="h-12 rounded-xl" required />
               </div>
               <Button
                 onClick={() => {

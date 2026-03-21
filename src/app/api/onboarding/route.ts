@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       });
     }
 
-    // 2. Create GigWorker (or find existing by email)
+    // 2. Find or create GigWorker (or find existing by email)
     let worker = await GigWorker.findOne({ email });
     if (!worker) {
       worker = await GigWorker.create({
@@ -53,6 +53,13 @@ export async function POST(request: Request) {
         onboardingDate: new Date(),
         isActive: true,
       });
+    } else {
+      // Update existing worker with persona if not already set or changed
+      worker.deliveryPartnerCategory = [persona];
+      worker.firstName = firstName || worker.firstName;
+      worker.lastName = lastName || worker.lastName;
+      worker.phoneNumber = phone || worker.phoneNumber;
+      await worker.save();
     }
 
     // 3. Create RiskProfile

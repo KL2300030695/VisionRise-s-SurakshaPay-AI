@@ -61,7 +61,7 @@ export async function GET(request: Request) {
         lastName: worker.lastName,
         email: worker.email,
         phone: worker.phoneNumber,
-        persona: worker.deliveryPartnerCategory?.[0] || 'Unknown',
+        persona: worker.deliveryPartnerCategory?.[0] || 'General Delivery',
         onboardingDate: worker.onboardingDate,
       },
       policy: policy ? {

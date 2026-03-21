@@ -53,6 +53,7 @@ export async function POST(request: Request) {
           firstName: worker.firstName,
           lastName: worker.lastName,
           email: worker.email,
+          phone: worker.phoneNumber,
         },
         message: 'Account created successfully!',
       });

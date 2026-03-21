@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -55,6 +55,26 @@ export default function OnboardingPage() {
 
   // Policy result
   const [policyId, setPolicyId] = useState('');
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedFirstName = localStorage.getItem('surakshapay_workerFirstName') || '';
+      const storedLastName = localStorage.getItem('surakshapay_workerLastName') || '';
+      const storedEmail = localStorage.getItem('surakshapay_workerEmail') || '';
+      const storedPhone = localStorage.getItem('surakshapay_workerPhone') || '';
+
+      if (storedFirstName) setFirstName(storedFirstName);
+      if (storedLastName) setLastName(storedLastName);
+      if (storedEmail) setEmail(storedEmail);
+      if (storedPhone) setPhone(storedPhone);
+
+      // If everything is present, skip Step 1
+      if (storedFirstName && storedLastName && storedEmail && storedPhone) {
+        setStep(2);
+      }
+    }
+  }, []);
 
   const handleGetQuote = async () => {
     if (!persona || !city) {

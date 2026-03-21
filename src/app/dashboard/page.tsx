@@ -117,7 +117,7 @@ export default function DashboardPage() {
   const { worker, policy, location, claims, totalPayouts } = dashData;
 
   // Extract persona label from the full persona string
-  const personaLabel = worker?.persona?.split('(')[0]?.trim() || worker?.persona || 'Delivery';
+  const personaLabel = worker?.persona?.split('(')[0]?.trim() || worker?.persona || 'Delivery Partner';
   const personaPlatform = worker?.persona?.match(/\(([^)]+)\)/)?.[1] || '';
 
   const formatDate = (dateStr: string) => {

@@ -99,8 +99,17 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error('Auth API error:', error);
+    
+    // Provide more descriptive errors for common DB connection issues
+    let errorMessage = error.message || 'Authentication failed';
+    if (errorMessage.includes('ENOTFOUND') || errorMessage.includes('ETIMEDOUT')) {
+      errorMessage = 'Database connection failed. Please check your MONGODB_URI and network connectivity.';
+    } else if (errorMessage.includes('buffering timed out')) {
+      errorMessage = 'The server is still connecting to the database. Please try again in a few seconds.';
+    }
+
     return NextResponse.json(
-      { success: false, error: error.message || 'Authentication failed' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }

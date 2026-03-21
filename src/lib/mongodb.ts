@@ -31,9 +31,19 @@ async function dbConnect() {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI as string, opts).then((mongoose) => {
-      return mongoose;
-    });
+    // Mask the URI for logging (security)
+    const maskedUri = MONGODB_URI!.replace(/\/\/.*@/, '//****:****@');
+
+    cached.promise = mongoose.connect(MONGODB_URI as string, opts)
+      .then((mongoose) => {
+        console.log(`[MongoDB] Successfully connected to ${maskedUri.split('/')[2]}`);
+        return mongoose;
+      })
+      .catch((err) => {
+        console.error(`[MongoDB] Connection error for ${maskedUri}:`, err.message);
+        cached.promise = null;
+        throw err;
+      });
   }
   
   try {

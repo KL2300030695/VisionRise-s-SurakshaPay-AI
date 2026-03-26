@@ -61,3 +61,30 @@
     @apply bg-background text-foreground font-body;
   }
 }
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .rotate-y-2 {
+    transform: rotateY(2deg);
+  }
+  
+  .rotate-x-2 {
+    transform: rotateX(2deg);
+  }
+  
+  .animate-bounce-slow {
+    animation: bounce-slow 4s infinite;
+  }
+  
+  @keyframes bounce-slow {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+}

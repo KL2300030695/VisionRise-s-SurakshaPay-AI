@@ -2,9 +2,21 @@
   "placeholderImages": [
     {
       "id": "hero-delivery",
-      "description": "Premium cinematic shot of Indian delivery rider in monsoon rain",
-      "imageUrl": "/images/hero-delivery.png",
-      "imageHint": "premium delivery rider in rain"
+      "description": "Premium 3D digital shield protecting a delivery rider in rain",
+      "imageUrl": "/images/hero-premium.png",
+      "imageHint": "premium digital protection shield"
+    },
+    {
+      "id": "feature-parametric",
+      "description": "Tech-focused visual of automated parametric payout",
+      "imageUrl": "/images/feature-parametric.png",
+      "imageHint": "automated payout visualization"
+    },
+    {
+      "id": "feature-risk",
+      "description": "AI-powered risk map of India",
+      "imageUrl": "/images/feature-risk.png",
+      "imageHint": "AI risk calculation map"
     },
     {
       "id": "food-delivery",

@@ -2,102 +2,120 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Shield, Zap, CloudRain, BarChart3, ChevronRight, LogIn } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function Home() {
-  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-delivery');
+  const images = PlaceHolderImages;
+  const heroImage = images.find(img => img.id === 'hero-delivery');
+  const featParametric = images.find(img => img.id === 'feature-parametric');
+  const featRisk = images.find(img => img.id === 'feature-risk');
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      {/* Header with Navigation and Login */}
-      <header className="px-6 lg:px-12 h-20 flex items-center justify-between border-b bg-white/50 backdrop-blur-md sticky top-0 z-50">
-        <Link className="flex items-center justify-center gap-2" href="/">
-          <div className="bg-primary p-1.5 rounded-lg">
+    <div className="flex flex-col min-h-screen bg-background overflow-x-hidden">
+      {/* Premium Header */}
+      <header className="px-6 lg:px-12 h-20 flex items-center justify-between border-b bg-white/70 dark:bg-black/70 backdrop-blur-xl sticky top-0 z-50">
+        <Link className="flex items-center justify-center gap-2 group" href="/">
+          <div className="bg-primary p-2 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
             <Shield className="h-6 w-6 text-white" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-primary font-headline">SurakshaPay AI</span>
+          <span className="text-xl font-black tracking-tight text-primary font-headline">SurakshaPay AI</span>
         </Link>
-        <nav className="hidden md:flex gap-8 items-center">
-          <Link className="text-sm font-medium hover:text-primary transition-colors" href="#features">How it Works</Link>
-          <Link className="text-sm font-medium hover:text-primary transition-colors" href="/admin/login">Insurer Admin Dashboard</Link>
-          <Link className="text-sm font-medium hover:text-primary transition-colors" href="/dashboard">My Dashboard</Link>
-          <div className="h-4 w-px bg-border mx-2"></div>
-          <Link className="text-sm font-bold text-primary flex items-center gap-1.5 hover:opacity-80 transition-opacity" href="/login">
+        <nav className="hidden lg:flex gap-10 items-center">
+          <Link className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors" href="#features">How it Works</Link>
+          <Link className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors" href="/admin/login">Insurer Portal</Link>
+          <Link className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors" href="/dashboard">My Dashboard</Link>
+          <div className="h-4 w-px bg-border"></div>
+          <Link className="flex items-center gap-2 text-sm font-black text-primary hover:opacity-80" href="/login">
             <LogIn className="h-4 w-4" />
             Sign In
           </Link>
         </nav>
-        <div className="flex items-center gap-3">
-           <Button variant="ghost" asChild className="md:hidden">
-            <Link href="/login">Login</Link>
-          </Button>
-          <Button asChild className="rounded-full shadow-lg hover:shadow-primary/20 px-6">
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+          <Button asChild className="rounded-2xl shadow-xl hover:shadow-primary/30 px-8 h-12 font-bold transition-all hover:scale-105 active:scale-95">
             <Link href="/onboarding">Protect My Income</Link>
           </Button>
         </div>
       </header>
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 px-6 lg:px-12 bg-gradient-to-b from-accent/30 to-background">
-          <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
-            <div className="flex flex-col justify-center space-y-8">
-              <div className="space-y-4">
-                <div className="inline-flex items-center rounded-full bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-700 ring-1 ring-inset ring-blue-500/30 shadow-sm">
-                  <span className="flex items-center gap-1.5 mr-2 border-r border-blue-500/30 pr-2 font-bold top-0">
-                    🏆 DEVTrails 2026
+        {/* Hero Section: The "Wow" Factor */}
+        <section className="relative w-full py-20 md:py-32 lg:py-48 px-6 lg:px-12 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%),radial-gradient(circle_at_80%_80%,rgba(147,51,234,0.05),transparent_50%)] -z-10"></div>
+          
+          <div className="container mx-auto grid lg:grid-cols-2 gap-16 items-center">
+            <div className="flex flex-col justify-center space-y-10">
+              <div className="space-y-6">
+                <div className="inline-flex items-center rounded-2xl bg-primary/5 px-4 py-2 text-sm font-black text-primary ring-1 ring-inset ring-primary/20 shadow-sm animate-in fade-in slide-in-from-left-4 duration-700">
+                  <span className="flex items-center gap-2 mr-3 border-r border-primary/20 pr-3 font-black uppercase tracking-tighter">
+                    <Zap className="h-4 w-4 fill-primary" /> DEVTrails 2026
                   </span>
-                  <span className="mr-1">Powered by</span>
-                  <span className="font-bold">Guidewire Cloud</span>
+                  <span className="flex items-center gap-1.5 opacity-80 decoration-primary font-bold">
+                    Powered by <span className="text-secondary font-black">Guidewire Cloud</span>
+                  </span>
                 </div>
-                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-7xl/none text-primary font-headline">
-                  Secure Your Weekly Income, No Matter the Weather.
+                <h1 className="text-5xl font-black tracking-tighter sm:text-6xl xl:text-8xl/none text-primary font-headline animate-in fade-in slide-in-from-left-6 duration-1000 delay-150">
+                  Secure Your Income <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-600 to-secondary">Automatically.</span>
                 </h1>
-                <p className="max-w-[600px] text-muted-foreground md:text-xl leading-relaxed">
-                  Protect your livelihoods from rain, floods, and curfews. SurakshaPay AI provides automated payouts for India's platform delivery partners (Zomato, Swiggy, Zepto, Amazon, etc.).
+                <p className="max-w-[600px] text-muted-foreground md:text-xl leading-relaxed font-medium animate-in fade-in slide-in-from-left-8 duration-1000 delay-300">
+                  The world&apos;s first parametric insurance designed for India&apos;s delivery partners. No forms. No delays. Just instant payouts when weather disrupts your day.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="h-14 px-8 rounded-full text-lg shadow-xl" asChild>
-                  <Link href="/onboarding">Get Your Quote Now</Link>
+              
+              <div className="flex flex-col sm:flex-row gap-5 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
+                <Button size="lg" className="h-16 px-10 rounded-2xl text-lg font-black shadow-2xl hover:scale-105 transition-all text-white bg-primary" asChild>
+                  <Link href="/onboarding">Get Protected Now</Link>
                 </Button>
-                <Button variant="outline" size="lg" className="h-14 px-8 rounded-full text-lg border-2" asChild>
-                  <Link href="/admin/login">Insurer Admin Portal</Link>
+                <Button variant="outline" size="lg" className="h-16 px-10 rounded-2xl text-lg font-bold border-2 hover:bg-muted/50 transition-all" asChild>
+                  <Link href="/dashboard">View Dashboard</Link>
                 </Button>
               </div>
-              <div className="flex items-center gap-4 text-sm font-medium text-muted-foreground">
-                <div className="flex -space-x-2">
+
+              <div className="flex items-center gap-6 text-sm font-bold text-muted-foreground/60 pt-4 border-t w-fit animate-in fade-in duration-1000 delay-700">
+                <div className="flex -space-x-3">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-8 w-8 rounded-full border-2 border-background bg-muted flex items-center justify-center overflow-hidden">
-                      <Image src={`https://picsum.photos/seed/user${i}/32/32`} width={32} height={32} alt="User" />
+                    <div key={i} className="h-10 w-10 rounded-full border-4 border-background bg-muted flex items-center justify-center overflow-hidden shadow-sm">
+                      <Image src={`https://picsum.photos/seed/partner${i}/40/40`} width={40} height={40} alt="User" />
                     </div>
                   ))}
+                  <div className="h-10 w-10 rounded-full border-4 border-background bg-primary text-white flex items-center justify-center text-[10px] font-black">+10k</div>
                 </div>
-                <span>Trusted by 10,000+ delivery partners across Mumbai, Delhi & Bangalore</span>
+                <span>Protecting 10,000+ Partners Daily</span>
               </div>
             </div>
-            <div className="relative group">
-              <div className="absolute -inset-4 rounded-2xl bg-gradient-to-tr from-primary/20 to-secondary/20 blur-2xl group-hover:opacity-100 transition duration-1000"></div>
+
+            <div className="relative animate-in fade-in zoom-in duration-1000 delay-200">
+              <div className="absolute -inset-10 rounded-full bg-primary/10 blur-[120px] -z-10 animate-pulse"></div>
               {heroImage && (
-                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-8 border-white">
-                  <Image
-                    src={heroImage.imageUrl}
-                    alt={heroImage.description}
-                    fill
-                    className="object-cover"
-                    data-ai-hint={heroImage.imageHint}
-                  />
-                  <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur p-4 rounded-xl shadow-lg flex items-center justify-between border border-primary/10">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 bg-secondary rounded-full flex items-center justify-center text-primary">
-                        <Zap className="h-5 w-5 animate-pulse" />
+                <div className="relative group perspective-1000">
+                  <div className="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.25)] border-[12px] border-white/80 backdrop-blur-sm transform hover:rotate-y-2 hover:rotate-x-2 transition-transform duration-700 ease-out">
+                    <Image
+                      src={heroImage.imageUrl}
+                      alt={heroImage.description}
+                      fill
+                      className="object-cover scale-105 group-hover:scale-110 transition-transform duration-1000"
+                      priority
+                    />
+                    
+                    {/* Floating Glass UI Element */}
+                    <div className="absolute inset-x-8 bottom-8 bg-white/60 backdrop-blur-2xl p-6 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center justify-between border border-white/40 animate-bounce-slow">
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 bg-secondary/80 rounded-2xl flex items-center justify-center text-primary shadow-lg">
+                          <Zap className="h-6 w-6 fill-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-primary">Trigger: Heavy Rain &gt; 12mm</p>
+                          <p className="text-[10px] text-primary/70 font-bold uppercase tracking-widest">Payout Dispatched via UPI</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-primary">Disruption Detected: Rain &gt; 10mm</p>
-                        <p className="text-xs text-muted-foreground">Automatic payout initiated via UPI</p>
+                      <div className="text-right">
+                        <span className="text-primary font-black text-2xl tracking-tighter">₹500.00</span>
+                        <div className="text-[8px] bg-green-500 text-white px-2 py-0.5 rounded-full font-black uppercase mt-1">Instant</div>
                       </div>
                     </div>
-                    <span className="text-primary font-black text-lg">₹500 Paid</span>
                   </div>
                 </div>
               )}
@@ -105,68 +123,149 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features / Explanation Section */}
-        <section id="features" className="w-full py-24 px-6 lg:px-12 bg-white">
+        {/* The Edge: Why SurakshaPay */}
+        <section id="features" className="py-32 px-6 lg:px-12 bg-white relative">
           <div className="container mx-auto">
-            <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-              <h2 className="text-3xl md:text-5xl font-bold font-headline text-primary">Designed for the Weekly Gig Life</h2>
-              <p className="text-lg text-muted-foreground">Traditional insurance is too slow. SurakshaPay AI works at the speed of the gig economy.</p>
+            <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
+              <div className="max-w-2xl space-y-4">
+                <Badge className="bg-secondary text-primary font-black rounded-lg px-3 py-1 mb-2 hover:bg-secondary border-none">THE CORE ENGINE</Badge>
+                <h2 className="text-4xl md:text-6xl font-black font-headline text-primary leading-tight tracking-tighter mt-4">Built for Speed, Powered by Intelligence.</h2>
+              </div>
+              <p className="text-lg text-muted-foreground max-w-sm font-medium border-l-4 border-primary/10 pl-6 py-2">
+                Traditional insurance relies on forms. SurakshaPay AI relies on data. 
+              </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-12">
-              <div className="p-8 rounded-3xl bg-accent/20 border border-accent hover:shadow-xl transition-all group">
-                <div className="h-14 w-14 rounded-2xl bg-white shadow-md flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <CloudRain className="h-7 w-7 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-3 font-headline">Parametric Triggers</h3>
-                <p className="text-muted-foreground">Payouts trigger automatically based on real-time weather and traffic data. No forms, no manual claims, no waiting for inspectors.</p>
-              </div>
-              <div className="p-8 rounded-3xl bg-accent/20 border border-accent hover:shadow-xl transition-all group">
-                <div className="h-14 w-14 rounded-2xl bg-white shadow-md flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <BarChart3 className="h-7 w-7 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-3 font-headline">Weekly Pricing Model</h3>
-                <p className="text-muted-foreground">Pay a small premium every week, aligned with your platform's payout cycle. Protect your earnings for the days that matter most.</p>
-              </div>
-              <div className="p-8 rounded-3xl bg-accent/20 border border-accent hover:shadow-xl transition-all group">
-                <div className="h-14 w-14 rounded-2xl bg-white shadow-md flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Zap className="h-7 w-7 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-3 font-headline">AI-Powered Risk Assessment</h3>
-                <p className="text-muted-foreground">Our AI calculates hyper-local premiums based on your persona (Food, Grocery, or E-commerce) and historical disruption patterns in your city.</p>
-              </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "Parametric Automation",
+                  desc: "We monitor hyper-local weather sensors in real-time. When triggers met, Guidewire ClaimCenter initiates payouts instantly.",
+                  icon: CloudRain,
+                  image: featParametric?.imageUrl,
+                  color: "from-blue-500 to-blue-600"
+                },
+                {
+                  title: "Hyper-Local Risk Map",
+                  desc: "Our AI analyzes city geography and persona patterns (Zomato vs Amazon) to calculate fair, micro-premiums down to the neighborhood.",
+                  icon: BarChart3,
+                  image: featRisk?.imageUrl,
+                  color: "from-purple-500 to-purple-600"
+                },
+                {
+                  title: "Fraud-Proof Claims",
+                  desc: "Using advanced GPS anti-spoofing and multi-source weather verification, we ensure every payout is honest and 100% automated.",
+                  icon: Shield,
+                  image: "https://picsum.photos/seed/shield/600/400",
+                  color: "from-emerald-500 to-emerald-600"
+                }
+              ].map((feat, i) => (
+                <Card key={i} className="group border-none shadow-2xl bg-white rounded-[2rem] overflow-hidden hover:translate-y-[-8px] transition-all duration-500">
+                  <div className="aspect-video relative overflow-hidden">
+                    <Image src={feat.image || ""} fill className="object-cover group-hover:scale-110 transition-transform duration-700" alt={feat.title} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-6 left-6 flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-lg">
+                        <feat.icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <h3 className="text-xl font-black text-white font-headline">{feat.title}</h3>
+                    </div>
+                  </div>
+                  <CardContent className="p-8">
+                    <p className="text-muted-foreground leading-relaxed font-medium">{feat.desc}</p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-24 px-6 lg:px-12 bg-primary text-white overflow-hidden relative">
-          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-secondary/20 rounded-full blur-3xl"></div>
-          <div className="container mx-auto relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
-            <div className="max-w-2xl space-y-6">
-              <h2 className="text-4xl md:text-6xl font-bold font-headline leading-tight">Income Protection, No Paperwork.</h2>
-              <p className="text-lg text-white/80">If it rains too hard or the city shuts down, we've got your back. Join the 10,000+ partners who delivery with peace of mind.</p>
-            </div>
-            <div className="flex flex-col gap-4">
-              <Button size="lg" variant="secondary" className="h-16 px-10 rounded-full text-xl shadow-2xl hover:scale-105 transition-transform" asChild>
-                <Link href="/onboarding">Get Started <ChevronRight className="ml-2 h-6 w-6" /></Link>
+        {/* How it Works Section */}
+        <section className="py-24 px-6 lg:px-12 bg-slate-50">
+          <div className="container mx-auto">
+             <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
+                <h2 className="text-4xl font-black font-headline text-primary tracking-tighter">Your Protection Flow</h2>
+                <p className="text-muted-foreground">Seamlessly integrated with your weekly gig schedule</p>
+             </div>
+             
+             <div className="grid md:grid-cols-4 gap-8">
+                {[
+                  { step: "01", title: "Select Profile", desc: "Choose your persona (Zomato, Swiggy, Amazon, etc.) and operating city." },
+                  { step: "02", title: "AI Quote", desc: "Get an instant weekly quote based on historical disruption data." },
+                  { step: "03", title: "Auto-Monitor", desc: "Our engine tracks rain, heat, and city events 24/7." },
+                  { step: "04", title: "Instant Payout", desc: "Disruption detected? Money hits your UPI in under 5 minutes." },
+                ].map((s, i) => (
+                  <div key={i} className="relative p-8 bg-white rounded-3xl shadow-xl hover:shadow-primary/5 transition-all">
+                    <span className="text-6xl font-black text-primary/5 absolute top-4 right-4">{s.step}</span>
+                    <div className="relative z-10 space-y-3">
+                      <h4 className="text-xl font-black text-primary font-headline">{s.title}</h4>
+                      <p className="text-sm text-muted-foreground font-medium leading-relaxed">{s.desc}</p>
+                    </div>
+                  </div>
+                ))}
+             </div>
+          </div>
+        </section>
+
+        {/* Premium CTA */}
+        <section className="py-32 px-6 lg:px-12 relative overflow-hidden">
+          <div className="absolute inset-0 bg-primary -z-10"></div>
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_10%_10%,rgba(255,255,255,0.1),transparent_30%),radial-gradient(circle_at_90%_90%,rgba(255,255,255,0.1),transparent_30%)] -z-10"></div>
+          
+          <div className="container mx-auto flex flex-col items-center text-center space-y-10 relative z-10">
+            <h2 className="text-5xl md:text-7xl font-black font-headline text-white leading-tight tracking-tighter max-w-4xl">
+              Don&apos;t Let the Weather Dictate Your Income.
+            </h2>
+            <p className="text-xl text-white/80 max-w-2xl font-medium leading-relaxed">
+              Join the future of parametric insurance. Protect your weekly earnings with the speed of Guidewire Cloud.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6">
+              <Button size="lg" variant="secondary" className="h-16 px-12 rounded-2xl text-xl font-black shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform" asChild>
+                <Link href="/onboarding">Activate My Protection <ChevronRight className="ml-2 h-6 w-6" /></Link>
               </Button>
-              <p className="text-center text-sm text-white/60 font-medium">Takes less than 2 minutes</p>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="py-12 px-6 lg:px-12 border-t bg-white">
-        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-primary" />
-            <span className="text-lg font-bold text-primary">SurakshaPay AI</span>
+      <footer className="py-20 px-6 lg:px-12 border-t bg-white">
+        <div className="container mx-auto">
+          <div className="grid md:grid-cols-4 gap-12 mb-16">
+            <div className="col-span-2 space-y-6">
+              <Link className="flex items-center gap-2" href="/">
+                <div className="bg-primary p-1.5 rounded-lg shadow-md">
+                  <Shield className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-xl font-black text-primary font-headline tracking-tighter">SurakshaPay AI</span>
+              </Link>
+              <p className="text-muted-foreground max-w-sm font-medium leading-relaxed">
+                Automated parametric insurance for platform economy professionals. Backed by Guidewire DEVTrails 2026.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <h5 className="font-black text-primary uppercase text-xs tracking-widest">Platform</h5>
+              <ul className="space-y-3 text-sm font-bold text-muted-foreground">
+                <li><Link href="/onboarding" className="hover:text-primary">Get Insured</Link></li>
+                <li><Link href="/dashboard" className="hover:text-primary">My Dashboard</Link></li>
+                <li><Link href="/disruptions" className="hover:text-primary">Live Triggers</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h5 className="font-black text-primary uppercase text-xs tracking-widest">Company</h5>
+              <ul className="space-y-3 text-sm font-bold text-muted-foreground">
+                <li><Link href="/admin/login" className="hover:text-primary">Insurer Portal</Link></li>
+                <li><Link href="/chat" className="hover:text-primary">Support Chat</Link></li>
+                <li><Link href="https://guidewire.com" target="_blank" className="hover:text-primary">Guidewire Cloud</Link></li>
+              </ul>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground text-center">© 2026 SurakshaPay AI. Developed for Guidewire DEVTrails Hackathon.</p>
-          <div className="flex gap-6">
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-primary">Sign In</Link>
-            <Link href="/onboarding" className="text-sm text-muted-foreground hover:text-primary">Onboarding</Link>
-            <Link href="/admin/login" className="text-sm text-muted-foreground hover:text-primary">Insurer Analytics</Link>
+          <div className="pt-10 border-t flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-xs font-black text-muted-foreground/60 uppercase tracking-widest">© 2026 SurakshaPay AI • Built for DEVTrails</p>
+            <div className="flex gap-8 text-xs font-black text-muted-foreground/60 uppercase tracking-widest">
+              <span>Privacy</span>
+              <span>Terms</span>
+              <span>Guidewire</span>
+            </div>
           </div>
         </div>
       </footer>

@@ -13,12 +13,15 @@ export async function GET(request: Request) {
     if (workerId) {
       worker = await FirestoreService.getDocument<any>('workers', workerId);
     } else {
-      // Get the most recently onboarded worker from Firestore
-      const recentWorkers = await FirestoreService.findMany<any>('workers', [
-        orderBy('onboardingDate', 'desc'),
-        limit(1)
-      ]);
-      worker = recentWorkers[0] || null;
+      // Demo Mode Fallback: Get all workers and find the most recent one in memory
+      // This ensures the dashboard always shows something even if not logged in,
+      // and avoids the need for a composite index on 'onboardingDate'.
+      const allWorkers = await FirestoreService.findMany<any>('workers', []);
+      worker = allWorkers.sort((a, b) => {
+        const dateA = a.onboardingDate?.toMillis?.() || 0;
+        const dateB = b.onboardingDate?.toMillis?.() || 0;
+        return dateB - dateA;
+      })[0] || null;
     }
 
     if (!worker) {
@@ -30,13 +33,18 @@ export async function GET(request: Request) {
     }
 
     // Fetch active policy from Firestore
-    const policies = await FirestoreService.findMany<any>('policies', [
+    // Note: Simplified query to avoid composite index requirements
+    const allPolicies = await FirestoreService.findMany<any>('policies', [
       where('gigWorkerId', '==', worker.id),
-      where('status', '==', 'Active'),
-      orderBy('createdAt', 'desc'),
-      limit(1)
+      where('status', '==', 'Active')
     ]);
-    const policy = policies[0] || null;
+    
+    // Sort in memory to avoid index requirement
+    const policy = allPolicies.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis?.() || 0;
+      const dateB = b.createdAt?.toMillis?.() || 0;
+      return dateB - dateA;
+    })[0] || null;
 
     // Fetch location from Firestore
     let location = null;
@@ -45,11 +53,17 @@ export async function GET(request: Request) {
     }
 
     // Fetch recent claims from Firestore
-    const claims = await FirestoreService.findMany<any>('claims', [
-      where('gigWorkerId', '==', worker.id),
-      orderBy('claimDate', 'desc'),
-      limit(10)
+    // Simplified query to avoid composite index requirements
+    const allClaims = await FirestoreService.findMany<any>('claims', [
+      where('gigWorkerId', '==', worker.id)
     ]);
+
+    // Sort and limit in memory
+    const claims = allClaims.sort((a, b) => {
+      const dateA = a.claimDate?.toMillis?.() || 0;
+      const dateB = b.claimDate?.toMillis?.() || 0;
+      return dateB - dateA;
+    }).slice(0, 10);
 
     // Aggregate total payouts
     const totalPayouts = claims

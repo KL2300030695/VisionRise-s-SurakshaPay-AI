@@ -4,10 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Shield, LogIn, Loader2, Eye, EyeOff, UserPlus, KeyRound, ArrowLeft, MailCheck } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -48,12 +49,9 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (data.success || res.status === 404) {
-        // Whether the account exists or not, show the same success message for security
-        setForgotSuccess('A recovery email has been sent to your inbox! Please check your email to continue. (Note: If you don\'t see it, check your spam folder)');
-      } else if (res.status === 404) {
-        setForgotError('No account found with this email. Please create a new account.');
+        setForgotSuccess('A recovery email has been sent to your inbox!');
       } else {
-        setForgotSuccess('If an account exists with this email, you can sign in using your email and any password. Your account has been verified.');
+        setForgotSuccess('Account verification check complete. Please try signing in.');
       }
     } catch {
       setForgotError('Network error. Please try again.');
@@ -90,18 +88,10 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        // Store workerId in localStorage for session persistence
         if (typeof window !== 'undefined') {
           localStorage.setItem('surakshapay_workerId', data.workerId);
-          localStorage.setItem('surakshapay_workerFirstName', data.worker?.firstName || '');
-          localStorage.setItem('surakshapay_workerLastName', data.worker?.lastName || '');
-          localStorage.setItem('surakshapay_workerEmail', data.worker?.email || '');
-          localStorage.setItem('surakshapay_workerPhone', data.worker?.phone || '');
         }
-
         setSuccess(data.message);
-        
-        // Redirect to dashboard after short delay
         setTimeout(() => {
           if (data.worker?.persona) {
             router.push('/dashboard');
@@ -120,225 +110,143 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        {/* Logo */}
-        <div className="text-center space-y-2">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <div className="bg-primary p-2 rounded-xl shadow-lg">
+    <div className="min-h-screen bg-background relative overflow-hidden flex items-center justify-center p-4">
+      {/* Professional Background Ornaments */}
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.05),transparent_50%),radial-gradient(circle_at_80%_80%,rgba(147,51,234,0.05),transparent_50%)] -z-10"></div>
+      
+      <div className="absolute top-8 right-8">
+        <ThemeToggle />
+      </div>
+
+      <div className="w-full max-w-[440px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <div className="text-center space-y-4">
+          <Link href="/" className="inline-flex items-center gap-3 group transition-all">
+            <div className="bg-primary p-2.5 rounded-2xl shadow-xl group-hover:scale-110 transition-transform">
               <Shield className="h-8 w-8 text-white" />
             </div>
-            <span className="text-2xl font-black text-primary font-headline">SurakshaPay AI</span>
+            <span className="text-3xl font-black text-primary font-headline tracking-tighter">SurakshaPay AI</span>
           </Link>
-          <p className="text-muted-foreground">
-            {mode === 'login' ? 'Sign in to manage your gig insurance' : 'Create your insurance account'}
-          </p>
+          <div className="space-y-1">
+            <h2 className="text-2xl font-black text-primary font-headline tracking-tight">
+              {mode === 'login' ? 'Welcome Back' : 'Join SurakshaPay'}
+            </h2>
+            <p className="text-sm text-muted-foreground font-medium">
+              {mode === 'login' ? 'Access your automated protection dashboard' : 'Protect your gig income in under 2 minutes'}
+            </p>
+          </div>
         </div>
 
-        <Card className="shadow-2xl border-none">
-          <CardHeader className="text-center pb-2">
-            <CardTitle className="text-2xl font-bold font-headline">
-              {showForgotPassword ? 'Reset Password' : mode === 'login' ? 'Welcome Back' : 'Create Account'}
-            </CardTitle>
-            <CardDescription>
-              {showForgotPassword
-                ? 'Enter your email to recover your account'
-                : mode === 'login' 
-                  ? 'Enter your credentials to access your dashboard' 
-                  : 'Sign up to get started with SurakshaPay'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Card className="shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] dark:shadow-primary/5 border-none bg-white/80 dark:bg-black/40 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
+          <CardContent className="p-8 md:p-10">
             {showForgotPassword ? (
-              <div className="space-y-4">
-                <div className="mx-auto h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-2">
-                  <KeyRound className="h-8 w-8 text-primary" />
-                </div>
-
+               <div className="space-y-6">
+                <Button variant="ghost" className="p-0 h-auto hover:bg-transparent text-primary font-bold flex items-center gap-2 mb-4" onClick={() => setShowForgotPassword(false)}>
+                  <ArrowLeft className="h-4 w-4" /> Back
+                </Button>
+                
                 {forgotSuccess ? (
-                  <div className="space-y-4 text-center">
-                    <div className="mx-auto h-16 w-16 bg-green-100 rounded-full flex items-center justify-center">
-                      <MailCheck className="h-8 w-8 text-green-600" />
-                    </div>
-                    <p className="text-sm text-green-700 bg-green-50 p-4 rounded-xl leading-relaxed">{forgotSuccess}</p>
-                    <Button
-                      className="w-full h-12 rounded-xl gap-2"
-                      onClick={() => {
-                        setShowForgotPassword(false);
-                        setForgotSuccess('');
-                        setForgotEmail('');
-                        setEmail(forgotEmail);
-                      }}
-                    >
-                      <ArrowLeft className="h-4 w-4" /> Back to Sign In
-                    </Button>
-                  </div>
+                   <div className="text-center space-y-6 animate-in zoom-in duration-500">
+                      <div className="mx-auto h-20 w-20 bg-green-500/10 rounded-full flex items-center justify-center">
+                        <MailCheck className="h-10 w-10 text-green-600" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-black text-primary tracking-tight">Email Sent!</h3>
+                        <p className="text-sm text-muted-foreground font-medium px-4 leading-relaxed">{forgotSuccess}</p>
+                      </div>
+                      <Button className="w-full h-14 rounded-2xl font-black shadow-lg" onClick={() => setShowForgotPassword(false)}>
+                        Return to Sign In
+                      </Button>
+                   </div>
                 ) : (
-                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <form onSubmit={handleForgotPassword} className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="forgot-email" className="text-sm font-bold">Email Address</Label>
+                      <Label htmlFor="forgot-email" className="text-sm font-black uppercase tracking-widest text-primary/60 ml-1">Email Address</Label>
                       <Input
                         id="forgot-email"
                         type="email"
                         placeholder="rider@example.com"
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
-                        className="h-12 rounded-xl px-4"
+                        className="h-14 rounded-2xl px-6 border-none bg-muted/30 focus-visible:ring-primary/20 shadow-inner"
                         required
-                        autoFocus
                       />
                     </div>
-
-                    {forgotError && (
-                      <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{forgotError}</p>
-                    )}
-
-                    <Button type="submit" className="w-full h-12 rounded-xl text-base shadow-lg gap-2" disabled={forgotLoading}>
-                      {forgotLoading ? (
-                        <><Loader2 className="h-4 w-4 animate-spin" /> Verifying...</>
-                      ) : (
-                        <><KeyRound className="h-4 w-4" /> Recover Account</>
-                      )}
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full h-10 rounded-xl text-sm gap-2"
-                      onClick={() => { setShowForgotPassword(false); setForgotError(''); setForgotEmail(''); }}
-                    >
-                      <ArrowLeft className="h-4 w-4" /> Back to Sign In
+                    {forgotError && <p className="text-xs font-bold text-red-500 bg-red-500/10 p-4 rounded-xl">{forgotError}</p>}
+                    <Button type="submit" className="w-full h-14 rounded-2xl font-black shadow-xl" disabled={forgotLoading}>
+                      {forgotLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Account"}
                     </Button>
                   </form>
                 )}
-              </div>
+               </div>
             ) : (
-            <>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {mode === 'register' && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-sm font-bold">First Name</Label>
-                    <Input
-                      id="firstName"
-                      placeholder="First name"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      className="h-11 rounded-xl px-4"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-sm font-bold">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      placeholder="Last name"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      className="h-11 rounded-xl px-4"
-                      required
-                    />
-                  </div>
-                </div>
-              )}
-
-              {mode === 'register' && (
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-sm font-bold">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    placeholder="Phone number"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="h-11 rounded-xl px-4"
-                    required
-                  />
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-bold">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-12 rounded-xl px-4"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm font-bold">Password</Label>
-                  {mode === 'login' && (
-                    <button type="button" className="text-xs text-primary hover:underline" onClick={() => { setShowForgotPassword(true); setForgotEmail(email); setError(''); setSuccess(''); }}>Forgot password?</button>
+              <div className="space-y-8">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {mode === 'register' && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary/60 ml-4">First Name</Label>
+                        <Input placeholder="John" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="h-12 rounded-2xl px-5 border-none bg-muted/30 shadow-inner" required />
+                      </div>
+                      <div className="space-y-2">
+                         <Label className="text-[10px] font-black uppercase tracking-widest text-primary/60 ml-4">Last Name</Label>
+                         <Input placeholder="Doe" value={lastName} onChange={(e) => setLastName(e.target.value)} className="h-12 rounded-2xl px-5 border-none bg-muted/30 shadow-inner" required />
+                      </div>
+                    </div>
                   )}
-                </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-12 rounded-xl px-4 pr-12"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+
+                  {mode === 'register' && (
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-primary/60 ml-4">Phone Number</Label>
+                      <Input placeholder="+91 00000 00000" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-14 rounded-2xl px-6 border-none bg-muted/30 shadow-inner" required />
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary/60 ml-4">Email</Label>
+                    <Input type="email" placeholder="rider@delivery.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-14 rounded-2xl px-6 border-none bg-muted/30 shadow-inner" required />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between px-4">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-primary/60">Password</Label>
+                      {mode === 'login' && <button type="button" onClick={() => setShowForgotPassword(true)} className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest">Forgot?</button>}
+                    </div>
+                    <div className="relative">
+                      <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl px-6 border-none bg-muted/30 shadow-inner pr-14" required />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary">
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {error && <p className="text-xs font-bold text-red-500 bg-red-500/10 p-4 rounded-xl">{error}</p>}
+                  {success && <p className="text-xs font-bold text-green-600 bg-green-500/10 p-4 rounded-xl">{success}</p>}
+
+                  <Button type="submit" className="w-full h-16 rounded-2xl text-lg font-black shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : mode === 'login' ? "Sign In" : "Register"}
+                  </Button>
+                </form>
+
+                <div className="space-y-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-primary/5"></div></div>
+                    <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest text-muted-foreground/40">
+                      <span className="bg-white dark:bg-black/20 px-4">Or Quick Access</span>
+                    </div>
+                  </div>
+
+                  <Button variant="outline" className="w-full h-14 rounded-2xl border-none bg-muted/30 hover:bg-primary/5 font-bold transition-all" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setSuccess(''); }}>
+                    {mode === 'login' ? "New Here? Create Account" : "Back to Sign In"}
+                  </Button>
                 </div>
               </div>
-
-              {error && (
-                <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>
-              )}
-              {success && (
-                <p className="text-sm text-green-600 bg-green-50 p-3 rounded-lg">{success}</p>
-              )}
-
-              <Button type="submit" className="w-full h-12 rounded-xl text-base shadow-lg gap-2" disabled={isLoading}>
-                {isLoading ? (
-                  <><Loader2 className="h-4 w-4 animate-spin" /> {mode === 'login' ? 'Signing In...' : 'Creating Account...'}</>
-                ) : mode === 'login' ? (
-                  <><LogIn className="h-4 w-4" /> Sign In</>
-                ) : (
-                  <><UserPlus className="h-4 w-4" /> Create Account</>
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center space-y-3">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t"></div></div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-white px-3 text-muted-foreground">
-                    {mode === 'login' ? 'New to SurakshaPay?' : 'Already have an account?'}
-                  </span>
-                </div>
-              </div>
-              {mode === 'login' ? (
-                <Button variant="outline" className="w-full h-12 rounded-xl" onClick={() => { setMode('register'); setError(''); setSuccess(''); }}>
-                  <UserPlus className="h-4 w-4 mr-2" /> Create Account
-                </Button>
-              ) : (
-                <Button variant="outline" className="w-full h-12 rounded-xl" onClick={() => { setMode('login'); setError(''); setSuccess(''); }}>
-                  <LogIn className="h-4 w-4 mr-2" /> Sign In Instead
-                </Button>
-              )}
-            </div>
-
-            
-            </>
             )}
           </CardContent>
         </Card>
+        
+        <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
+          Powered by Guidewire Cloud • DEVTrails 2026
+        </p>
       </div>
     </div>
   );

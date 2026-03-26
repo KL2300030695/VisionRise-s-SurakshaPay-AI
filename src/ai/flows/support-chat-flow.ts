@@ -9,8 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import dbConnect from '@/lib/mongodb';
-import GigWorker from '@/models/GigWorker';
+import { FirestoreService } from '@/lib/firestore-service';
 
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
@@ -20,7 +19,7 @@ const MessageSchema = z.object({
 const SupportChatInputSchema = z.object({
   message: z.string().describe('The user\'s question or message.'),
   history: z.array(MessageSchema).optional().describe('The conversation history.'),
-  gigWorkerId: z.string().optional().describe('The MongoDB ObjectId of the gig worker.'),
+  gigWorkerId: z.string().optional().describe('The Firestore document ID of the gig worker.'),
 });
 export type SupportChatInput = z.infer<typeof SupportChatInputSchema>;
 
@@ -52,16 +51,15 @@ const supportChatFlow = ai.defineFlow(
   async (input) => {
     let systemPrompt = baseSystemPrompt;
     
-    // Fetch context from MongoDB if ID is provided
+    // Fetch context from Firestore if ID is provided
     if (input.gigWorkerId) {
       try {
-        await dbConnect();
-        const worker = await GigWorker.findById(input.gigWorkerId);
+        const worker = await FirestoreService.getDocument<any>('workers', input.gigWorkerId);
         if (worker) {
-          systemPrompt += `\n\nUSER CONTEXT:\nYou are talking to ${worker.firstName} ${worker.lastName}. They work in the ${worker.deliveryPartnerCategory.join(', ')} category. Greet them by name.`;
+          systemPrompt += `\n\nUSER CONTEXT:\nYou are talking to ${worker.firstName} ${worker.lastName}. They work in the ${worker.deliveryPartnerCategory?.join(', ') || 'N/A'} category. Greet them by name.`;
         }
       } catch (error) {
-        console.error("Failed to fetch worker context from MongoDB", error);
+        console.error("Failed to fetch worker context from Firestore", error);
       }
     }
 

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, CloudRain, MessageCircle, Zap, IndianRupee, MapPin, Clock, ChevronRight, Eye, CalendarDays, Activity, TrendingUp, Loader2, AlertCircle } from 'lucide-react';
+import { ReportIssueDialog } from '@/components/report-issue-dialog';
 
 interface DashboardData {
   hasData: boolean;
@@ -51,9 +52,7 @@ export default function DashboardPage() {
   const [weatherSummary, setWeatherSummary] = useState<any>(null);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    setMounted(true);
-
+  const fetchDashboardData = () => {
     // Get workerId from localStorage (set during login)
     const workerId = typeof window !== 'undefined' ? localStorage.getItem('surakshapay_workerId') : null;
     const apiUrl = workerId ? `/api/dashboard?workerId=${workerId}` : '/api/dashboard';
@@ -78,6 +77,11 @@ export default function DashboardPage() {
         if (data.success) setWeatherSummary(data);
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    setMounted(true);
+    fetchDashboardData();
   }, []);
 
   if (!mounted) return null;
@@ -308,7 +312,12 @@ export default function DashboardPage() {
         </Card>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-4 gap-4">
+          <ReportIssueDialog 
+            workerId={worker?.id || ""} 
+            location={location?.city || "Unknown"} 
+            onSuccess={fetchDashboardData}
+          />
           <Button variant="outline" asChild className="h-16 rounded-2xl justify-start gap-3 px-6 shadow-sm hover:shadow-md transition-all">
             <Link href="/chat">
               <MessageCircle className="h-5 w-5 text-primary" />

@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import GigWorker from '@/models/GigWorker';
-import Location from '@/models/Location';
-import RiskProfile from '@/models/RiskProfile';
-import InsurancePolicy from '@/models/InsurancePolicy';
+import { FirestoreService } from '@/lib/firestore-service';
+import { where, Timestamp } from 'firebase/firestore';
 
 // City metadata for Location creation
 const CITY_META: Record<string, { state: string; coordinates: string }> = {
@@ -17,7 +14,6 @@ const CITY_META: Record<string, { state: string; coordinates: string }> = {
 
 export async function POST(request: Request) {
   try {
-    await dbConnect();
     const body = await request.json();
 
     const {
@@ -26,11 +22,12 @@ export async function POST(request: Request) {
       guidewirePolicyId,
     } = body;
 
-    // 1. Find or create Location
+    // 1. Find or create Location in Firestore
     const cityMeta = CITY_META[city] || { state: city, coordinates: '0,0' };
-    let location = await Location.findOne({ city });
+    let location = await FirestoreService.findOne('locations', [where('city', '==', city)]);
+    
     if (!location) {
-      location = await Location.create({
+      location = await FirestoreService.addDocument('locations', {
         name: city,
         city,
         state: cityMeta.state,
@@ -40,57 +37,59 @@ export async function POST(request: Request) {
       });
     }
 
-    // 2. Find or create GigWorker (or find existing by email)
-    let worker = await GigWorker.findOne({ email });
+    // 2. Find or create GigWorker (or find existing by email) in Firestore
+    let worker = await FirestoreService.findOne<any>('workers', [where('email', '==', email)]);
+    
     if (!worker) {
-      worker = await GigWorker.create({
+      worker = await FirestoreService.addDocument('workers', {
         externalAuthId: `AUTH_${Date.now()}`,
         firstName,
         lastName,
         email,
         phoneNumber: phone,
         deliveryPartnerCategory: [persona],
-        onboardingDate: new Date(),
+        onboardingDate: Timestamp.now(),
         isActive: true,
       });
     } else {
       // Update existing worker with persona if not already set or changed
-      worker.deliveryPartnerCategory = [persona];
-      worker.firstName = firstName || worker.firstName;
-      worker.lastName = lastName || worker.lastName;
-      worker.phoneNumber = phone || worker.phoneNumber;
-      await worker.save();
+      await FirestoreService.updateDocument('workers', worker.id, {
+        deliveryPartnerCategory: [persona],
+        firstName: firstName || worker.firstName,
+        lastName: lastName || worker.lastName,
+        phoneNumber: phone || worker.phoneNumber,
+      });
     }
 
-    // 3. Create RiskProfile
-    const riskProfile = await RiskProfile.create({
-      gigWorkerId: worker._id,
-      locationId: location._id,
-      riskScore: Math.round(weeklyPremium * 2.5), // Derived from premium
+    // 3. Create RiskProfile in Firestore
+    const riskProfile = await FirestoreService.addDocument('riskProfiles', {
+      gigWorkerId: worker.id,
+      locationId: location.id,
+      riskScore: Math.round(weeklyPremium * 2.5),
       predictedDisruptionLikelihood: riskFactors?.join(', ') || 'Standard',
-      lastCalculatedDate: new Date(),
-      effectiveDate: new Date(),
+      lastCalculatedDate: Timestamp.now(),
+      effectiveDate: Timestamp.now(),
     });
 
-    // 4. Create InsurancePolicy
+    // 4. Create InsurancePolicy in Firestore
     const now = new Date();
     const endDate = new Date(now);
-    endDate.setDate(endDate.getDate() + 7); // Weekly policy
+    endDate.setDate(endDate.getDate() + 7);
     const paymentDue = new Date(now);
     paymentDue.setDate(paymentDue.getDate() + 7);
 
-    const policy = await InsurancePolicy.create({
-      gigWorkerId: worker._id,
-      policyStartDate: now,
-      policyEndDate: endDate,
+    const policy = await FirestoreService.addDocument('policies', {
+      gigWorkerId: worker.id,
+      policyStartDate: Timestamp.fromDate(now),
+      policyEndDate: Timestamp.fromDate(endDate),
       premiumAmount: weeklyPremium,
       coverageAmountPerDay: 500,
-      coverageAmountTotal: 3500, // 7 days × ₹500
+      coverageAmountTotal: 3500,
       status: 'Active',
-      paymentDueDate: paymentDue,
+      paymentDueDate: Timestamp.fromDate(paymentDue),
       isPaid: true,
-      riskProfileId: riskProfile._id,
-      coveredLocationId: location._id,
+      riskProfileId: riskProfile.id,
+      coveredLocationId: location.id,
     });
 
     // 5. Call Guidewire PolicyCenter mock
@@ -98,12 +97,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      workerId: worker._id,
-      policyId: policy._id,
+      workerId: worker.id,
+      policyId: policy.id,
       policyCenterId,
-      locationId: location._id,
-      riskProfileId: riskProfile._id,
-      message: 'Onboarding completed! Worker, policy, and risk profile saved.',
+      locationId: location.id,
+      riskProfileId: riskProfile.id,
+      message: 'Onboarding completed! Worker, policy, and risk profile saved to Firestore.',
     });
   } catch (error: any) {
     console.error('Onboarding API error:', error);

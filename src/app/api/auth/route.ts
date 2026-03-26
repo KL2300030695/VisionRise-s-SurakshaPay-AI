@@ -1,17 +1,10 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import GigWorker from '@/models/GigWorker';
+import { FirestoreService } from '@/lib/firestore-service';
+import { where, Timestamp } from 'firebase/firestore';
 import { sendRecoveryEmail } from '@/lib/resend';
 
-/**
- * POST /api/auth
- * Handles both login and registration:
- * - If a worker with this email exists → login (return worker data)
- * - If not → register a new worker
- */
 export async function POST(request: Request) {
   try {
-    await dbConnect();
     const body = await request.json();
     const { email, password, action } = body;
 
@@ -24,7 +17,7 @@ export async function POST(request: Request) {
 
     if (action === 'register') {
       // Check if worker already exists
-      const existing = await GigWorker.findOne({ email });
+      const existing = await FirestoreService.findOne<any>('workers', [where('email', '==', email)]);
       if (existing) {
         return NextResponse.json(
           { success: false, error: 'An account with this email already exists. Please sign in.' },
@@ -32,24 +25,26 @@ export async function POST(request: Request) {
         );
       }
 
-      // Create new worker with basic info (full profile completed during onboarding)
-      const worker = await GigWorker.create({
+      // Create new worker record in Firestore
+      const workerData = {
         externalAuthId: `AUTH_${Date.now()}`,
         firstName: body.firstName || email.split('@')[0],
         lastName: body.lastName || '',
         email,
         phoneNumber: body.phone || '',
         deliveryPartnerCategory: [],
-        onboardingDate: new Date(),
+        onboardingDate: Timestamp.now(),
         isActive: true,
-      });
+      };
+
+      const worker = await FirestoreService.addDocument<any>('workers', workerData);
 
       return NextResponse.json({
         success: true,
         action: 'registered',
-        workerId: worker._id,
+        workerId: worker.id,
         worker: {
-          id: worker._id,
+          id: worker.id,
           firstName: worker.firstName,
           lastName: worker.lastName,
           email: worker.email,
@@ -60,9 +55,9 @@ export async function POST(request: Request) {
     }
 
     // Login: find existing worker by email
-    const worker = await GigWorker.findOne({ email });
+    const worker = await FirestoreService.findOne<any>('workers', [where('email', '==', email)]);
 
-    // Handle recovery simulation/trigger from frontend
+    // Handle recovery simulation
     if (password === 'reset-check') {
       if (worker) {
         await sendRecoveryEmail(email, worker.firstName);
@@ -80,16 +75,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // Update last activity
-    worker.lastActivityDate = new Date();
-    await worker.save();
+    // Update last activity in Firestore
+    await FirestoreService.updateDocument('workers', worker.id, {
+      lastActivityDate: Timestamp.now(),
+    });
 
     return NextResponse.json({
       success: true,
       action: 'login',
-      workerId: worker._id,
+      workerId: worker.id,
       worker: {
-        id: worker._id,
+        id: worker.id,
         firstName: worker.firstName,
         lastName: worker.lastName,
         email: worker.email,

@@ -1,25 +1,24 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import GigWorker from '@/models/GigWorker';
-import InsurancePolicy from '@/models/InsurancePolicy';
-import Claim from '@/models/Claim';
-import Location from '@/models/Location';
+import { FirestoreService } from '@/lib/firestore-service';
+import { where, orderBy, limit } from 'firebase/firestore';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
-    await dbConnect();
-
     const { searchParams } = new URL(request.url);
     const workerId = searchParams.get('workerId');
 
     let worker;
     if (workerId) {
-      worker = await GigWorker.findById(workerId);
+      worker = await FirestoreService.getDocument<any>('workers', workerId);
     } else {
-      // Get the most recently onboarded worker
-      worker = await GigWorker.findOne({}).sort({ createdAt: -1 });
+      // Get the most recently onboarded worker from Firestore
+      const recentWorkers = await FirestoreService.findMany<any>('workers', [
+        orderBy('onboardingDate', 'desc'),
+        limit(1)
+      ]);
+      worker = recentWorkers[0] || null;
     }
 
     if (!worker) {
@@ -30,22 +29,27 @@ export async function GET(request: Request) {
       });
     }
 
-    // Fetch active policy
-    const policy = await InsurancePolicy.findOne({
-      gigWorkerId: worker._id,
-      status: 'Active',
-    }).sort({ createdAt: -1 });
+    // Fetch active policy from Firestore
+    const policies = await FirestoreService.findMany<any>('policies', [
+      where('gigWorkerId', '==', worker.id),
+      where('status', '==', 'Active'),
+      orderBy('createdAt', 'desc'),
+      limit(1)
+    ]);
+    const policy = policies[0] || null;
 
-    // Fetch location
+    // Fetch location from Firestore
     let location = null;
     if (policy?.coveredLocationId) {
-      location = await Location.findById(policy.coveredLocationId);
+      location = await FirestoreService.getDocument<any>('locations', policy.coveredLocationId);
     }
 
-    // Fetch recent claims / payouts
-    const claims = await Claim.find({ gigWorkerId: worker._id })
-      .sort({ claimDate: -1 })
-      .limit(10);
+    // Fetch recent claims from Firestore
+    const claims = await FirestoreService.findMany<any>('claims', [
+      where('gigWorkerId', '==', worker.id),
+      orderBy('claimDate', 'desc'),
+      limit(10)
+    ]);
 
     // Aggregate total payouts
     const totalPayouts = claims
@@ -56,7 +60,7 @@ export async function GET(request: Request) {
       success: true,
       hasData: true,
       worker: {
-        id: worker._id,
+        id: worker.id,
         firstName: worker.firstName,
         lastName: worker.lastName,
         email: worker.email,
@@ -65,7 +69,7 @@ export async function GET(request: Request) {
         onboardingDate: worker.onboardingDate,
       },
       policy: policy ? {
-        id: policy._id,
+        id: policy.id,
         status: policy.status,
         premiumAmount: policy.premiumAmount,
         coveragePerDay: policy.coverageAmountPerDay,
@@ -80,7 +84,7 @@ export async function GET(request: Request) {
         state: location.state,
       } : null,
       claims: claims.map(c => ({
-        id: c._id,
+        id: c.id,
         date: c.claimDate,
         status: c.status,
         amount: c.claimedLostIncomeAmount,

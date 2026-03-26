@@ -1,18 +1,14 @@
 'use server';
 
 import { intelligentFraudDetection } from '@/ai/flows/intelligent-fraud-detection';
-import dbConnect from '@/lib/mongodb';
-import DisruptionEvent from '@/models/DisruptionEvent';
-import GigWorker from '@/models/GigWorker';
-import InsurancePolicy from '@/models/InsurancePolicy';
-import Claim from '@/models/Claim';
+import { FirestoreService } from '@/lib/firestore-service';
+import { where, Timestamp } from 'firebase/firestore';
 
 /**
- * Mock Payment Gateway Integration (Simulating Razorpay/Stripe Sandbox)
+ * Mock Payment Gateway Integration
  */
 async function initiateMockPayout(amount: number, workerId: string) {
   console.log(`[MOCK API] Initiating payout of ₹${amount} to worker ${workerId} via UPI...`);
-  // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1200));
   return {
     success: true,
@@ -22,12 +18,7 @@ async function initiateMockPayout(amount: number, workerId: string) {
 }
 
 /**
- * Simulates the parametric insurance engine.
- * 1. Detects a disruption.
- * 2. Identifies affected policies.
- * 3. Automatically initiates claims.
- * 4. Runs AI fraud detection.
- * 5. Approves and processes payouts for legitimate claims.
+ * Simulates the parametric insurance engine using Firestore.
  */
 export async function simulateParametricTrigger(
   disruptionData: {
@@ -39,49 +30,43 @@ export async function simulateParametricTrigger(
   }
 ) {
   try {
-    await dbConnect();
-
-    // 1. Record the Disruption Event (Simulating Weather API Feed)
-    const disruptionEvent = await DisruptionEvent.create({
+    // 1. Record the Disruption Event in Firestore
+    const disruptionEvent = await FirestoreService.addDocument<any>('disruptions', {
       type: [disruptionData.type],
       subType: disruptionData.subType,
       severity: [disruptionData.severity],
       description: disruptionData.description,
-      startDate: new Date(),
-      affectedLocationIds: [disruptionData.location], // Assuming this is an ObjectId string for now
+      startDate: Timestamp.now(),
+      affectedLocationIds: [disruptionData.location],
       source: 'Simulated Weather API',
       isVerified: true,
     });
 
-    const disruptionRefId = disruptionEvent._id.toString();
-
-    // 2. Scan for active policies in that location
-    // Find all active policies covering this location
-    const activePolicies = await InsurancePolicy.find({
-      status: 'Active',
-      coveredLocationId: disruptionData.location
-    });
+    // 2. Scan for active policies in that location via Firestore
+    const activePolicies = await FirestoreService.findMany<any>('policies', [
+      where('status', '==', 'Active'),
+      where('coveredLocationId', '==', disruptionData.location)
+    ]);
 
     for (const policy of activePolicies) {
-      const workerId = policy.gigWorkerId.toString();
+      const workerId = policy.gigWorkerId;
       
-      // 3. Automatic Claim Initiation
-      const claim = await Claim.create({
+      // 3. Automatic Claim Initiation in Firestore
+      const claim = await FirestoreService.addDocument<any>('claims', {
         gigWorkerId: workerId,
-        policyId: policy._id,
-        disruptionEventId: disruptionEvent._id,
-        claimDate: new Date(),
+        policyId: policy.id,
+        disruptionEventId: disruptionEvent.id,
+        claimDate: Timestamp.now(),
         status: 'Initiated',
         claimedLostIncomeAmount: policy.coverageAmountPerDay || 500,
         isAutomated: true,
+        lastUpdatedDate: Timestamp.now(),
       });
 
-      const claimIdStr = claim._id.toString();
-
-      // 4. Intelligent Fraud Detection (Calling AI Flow)
+      // 4. Intelligent Fraud Detection
       try {
         const fraudResult = await intelligentFraudDetection({
-           claimId: claimIdStr,
+           claimId: claim.id,
            workerId: workerId,
            claimDetails: `Automatic trigger: ${disruptionData.subType} in ${disruptionData.location}. Severity: ${disruptionData.severity}`,
            claimLocation: disruptionData.location,
@@ -91,24 +76,21 @@ export async function simulateParametricTrigger(
 
         // 5. Process Payout if legitimate
         if (!fraudResult.isFraudulent && fraudResult.confidenceScore > 0.7) {
-          // Call our Mock Payment Gateway
-          const payoutResponse = await initiateMockPayout(claim.claimedLostIncomeAmount, workerId);
+          await initiateMockPayout(claim.claimedLostIncomeAmount, workerId);
 
-          claim.status = 'Paid';
-          claim.fraudScore = Math.round((1 - fraudResult.confidenceScore) * 100);
-          claim.approvedPayoutAmount = claim.claimedLostIncomeAmount;
-          claim.lastUpdatedDate = new Date();
-          await claim.save();
-
-          // Note: In a complete implementation, we would also save the PayoutTransaction
-          // to a separate PayoutTransaction collection here.
-
+          await FirestoreService.updateDocument('claims', claim.id, {
+            status: 'Paid',
+            fraudScore: Math.round((1 - fraudResult.confidenceScore) * 100),
+            approvedPayoutAmount: claim.claimedLostIncomeAmount,
+            lastUpdatedDate: Timestamp.now()
+          });
         } else {
-          claim.status = 'Under Review';
-          claim.fraudScore = Math.round((1 - fraudResult.confidenceScore) * 100);
-          claim.fraudReason = fraudResult.fraudReason;
-          claim.lastUpdatedDate = new Date();
-          await claim.save();
+          await FirestoreService.updateDocument('claims', claim.id, {
+            status: 'Under Review',
+            fraudScore: Math.round((1 - fraudResult.confidenceScore) * 100),
+            fraudReason: fraudResult.fraudReason,
+            lastUpdatedDate: Timestamp.now()
+          });
         }
       } catch (e) {
         console.error("AI Fraud Detection Simulation Error", e);

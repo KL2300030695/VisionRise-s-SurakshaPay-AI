@@ -100,7 +100,7 @@ const fraudDetectionPrompt = ai.definePrompt({
   
 Claim ID: {{{claimId}}}
 Worker ID: {{{workerId}}}
-Details: {{{claimDetails}}}
+Details (Stimulation Query): {{{claimDetails}}}
 Location: {{{claimLocation}}}
 
 {{#if workerActivityLog}}
@@ -109,8 +109,12 @@ Worker Activity Log: {{{workerActivityLog}}}
 
 Check for:
 1. GPS Spoofing: Use validateWorkerActivity to see if location logs are inconsistent.
-2. Duplicate Claims: Use checkDuplicateClaim to see if they've claimed for this same rainstorm twice.
+2. Duplicate Claims: Use checkDuplicateClaim to see if they've claimed for this same event twice.
 3. Context: Does the claim time match the disruption event?
+4. Plausibility (Stimulation): If this is a "stimulation" query (a reported problem by the worker), is it plausible for the location? 
+   - Rains/Heat waves: Are they meteorologically possible for that city/season?
+   - Curfews: Are there any known civil disruptions in that area?
+   - If the claim is clearly impossible (e.g., snow in a tropical city in summer), flag it as fraudulent.
 
 Provide a detailed fraudReason and confidenceScore.`,
 });

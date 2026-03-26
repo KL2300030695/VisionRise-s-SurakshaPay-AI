@@ -1,17 +1,27 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import DisruptionEvent from '@/models/DisruptionEvent';
+import { FirestoreService } from '@/lib/firestore-service';
+import { orderBy, limit } from 'firebase/firestore';
 
 export async function GET() {
   try {
-    await dbConnect();
-    
-    // Fetch the 5 most recent disruptions
-    const disruptions = await DisruptionEvent.find({})
-      .sort({ startDate: -1 })
-      .limit(5);
+    // Fetch the 5 most recent disruptions from Firestore
+    const disruptions = await FirestoreService.findMany<any>('disruptions', [
+      orderBy('startDate', 'desc'),
+      limit(5)
+    ]);
 
-    return NextResponse.json({ success: true, disruptions });
+    return NextResponse.json({
+      success: true,
+      disruptions: disruptions.map(d => ({
+        id: d.id,
+        type: d.type?.[0] || d.type,
+        subType: d.subType,
+        severity: d.severity?.[0] || d.severity,
+        description: d.description,
+        startDate: d.startDate,
+        isVerified: d.isVerified,
+      })),
+    });
   } catch (error) {
     console.error("Failed to fetch disruptions API", error);
     return NextResponse.json(

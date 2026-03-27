@@ -2,7 +2,8 @@
   <img src="https://img.shields.io/badge/Guidewire-DEVTrails%202026-blue?style=for-the-badge" alt="DEVTrails 2026" />
   <img src="https://img.shields.io/badge/AI-Gemini%202.5%20Flash-orange?style=for-the-badge" alt="Gemini AI" />
   <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge" alt="Next.js 15" />
-  <img src="https://img.shields.io/badge/Genkit-1.x-purple?style=for-the-badge" alt="Genkit" />
+  <img src="https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=for-the-badge&logo=firebase" alt="Firebase" />
+  <img src="https://img.shields.io/badge/Theme-Premium%20Glass-8B5CF6?style=for-the-badge" alt="Premium Theme" />
 </p>
 
 # 🛡️ SurakshaPay AI
@@ -86,27 +87,27 @@ For the Guidewire DEVTrails 2026, we have chosen a **Responsive Web App (Next.js
 | 🌧️ Heavy Rainfall | > 8 mm/hr | High |
 | 🌡️ Extreme Heat | > 42°C | Critical |
 | 💨 High Wind | > 20 m/s | High |
-| 🌫️ Air Quality (AQI) | > 400 | Severe |
-| 🚫 Social Disruption | Curfew / Platform pause | Critical |
-
----
-
-## 🧠 AI & ML Integration
+| 🌫️ Air Quality ## 🧠 AI & ML Integration
 
 ### 1. Dynamic Premium Pricing (Genkit + Gemini 2.5 Flash)
-- Analyzes historical weather, traffic, and disruption data per city
-- Generates personalized weekly premiums based on persona + hyper-local risk
-- Provides transparent risk factor breakdown and AI explanation
+- Analyzes historical weather, traffic, and disruption data per city.
+- Generates personalized weekly premiums based on persona + hyper-local risk.
+- Provides transparent risk factor breakdown with AI-driven explanations.
 
-### 2. Intelligent Fraud Detection (AI Agent with Tools)
-- **GPS Spoofing Detection**: Validates location logs against platform APIs
-- **Duplicate Claim Prevention**: Cross-references claim windows per worker
-- **Activity Validation**: Verifies worker was active during claimed disruption
-- **Outcome**: Claims auto-approved or flagged with confidence score
+### 2. Premium Design System (next-themes + ShadCN)
+- **Glassmorphism Aesthetic**: Modern, semi-transparent UI for a premium feel.
+- **Dynamic Theming**: Seamless Dark/Light mode switching with system preference detection.
+- **Animated Components**: Smooth transitions and interactive elements for enhanced UX.
 
-### 3. AI Support Chat
-- Natural language assistant for policy queries and help
-- Powered by Gemini 2.5 Flash via Genkit flows
+### 3. Intelligent Fraud Detection (AI Agent with Tools)
+- **GPS Spoofing Detection**: Validates location logs against platform APIs.
+- **Duplicate Claim Prevention**: Cross-references claim windows per worker.
+- **Activity Validation**: Verifies worker was active during claimed disruption.
+- **Outcome**: Claims auto-approved or flagged with confidence scores.
+
+### 4. AI Support Chat
+- Natural language assistant for policy queries and real-time help.
+- Powered by Gemini 2.5 Flash via Genkit flows.
 
 ---
 
@@ -115,9 +116,12 @@ For the Guidewire DEVTrails 2026, we have chosen a **Responsive Web App (Next.js
 | Layer | Technology |
 |---|---|
 | **Frontend** | Next.js 15, React 19, Tailwind CSS, ShadCN UI |
-| **Backend** | Next.js API Routes, MongoDB, Mongoose |
+| **Theme System** | `next-themes` (Dark/Light Mode, Glassmorphism) |
+| **Backend** | Next.js API Routes |
+| **Persistence** | **Firebase / Firestore** (Primary), MongoDB (Legacy/Archive) |
 | **AI Orchestration** | Genkit 1.x |
 | **AI Model** | Google Gemini 2.5 Flash |
+| **Notifications** | Resend API |
 | **Insurance Platform** | Guidewire Cloud (PolicyCenter + ClaimCenter) |
 | **Weather Data** | Open-Meteo API (live, real-time) |
 | **Deployment** | Firebase App Hosting |
@@ -130,33 +134,32 @@ For the Guidewire DEVTrails 2026, we have chosen a **Responsive Web App (Next.js
 SurakshaPay-AI/
 ├── src/
 │   ├── app/                      # Next.js App Router pages
-│   │   ├── page.tsx              # Landing page (hero, features, CTA)
-│   │   ├── login/                # Worker authentication
+│   │   ├── (auth)/               # Auth-guarded routes
+│   │   ├── page.tsx              # Premium Landing page
+│   │   ├── login/                # Glassmorphic Login
+│   │   ├── register/             # Redesigned Registration
 │   │   ├── onboarding/           # 4-step onboarding wizard
 │   │   ├── dashboard/            # Worker policy dashboard
-│   │   ├── disruptions/          # Live weather & trigger monitoring
-│   │   ├── admin/                # Insurer analytics dashboard
+│   │   ├── disruptions/          # Live weather monitoring
+│   │   ├── admin/                # Insurer analytics & simulations
 │   │   ├── chat/                 # AI support chat
-│   │   └── api/                  # Backend API routes
-│   │       ├── auth/             # Authentication endpoints
-│   │       ├── onboarding/       # Policy creation + MongoDB persistence
-│   │       ├── dashboard/        # Worker dashboard data
-│   │       ├── weather/          # Live weather API integration
-│   │       ├── disruptions/      # Parametric trigger processing
-│   │       └── guidewire/        # Guidewire PolicyCenter & ClaimCenter
-│   ├── ai/
-│   │   ├── genkit.ts             # Genkit AI configuration
-│   │   └── flows/
-│   │       ├── ai-powered-premium-calculation.ts  # Dynamic pricing flow
-│   │       ├── intelligent-fraud-detection.ts     # Fraud detection agent
-│   │       └── support-chat-flow.ts               # AI chat assistant
-│   ├── components/               # ShadCN UI components
-│   ├── lib/                      # Utilities & parametric engine
-│   ├── models/                   # MongoDB/Mongoose models
-│   └── hooks/                    # React hooks
-├── docs/                         # Documentation & blueprints
-├── firestore.rules               # Firebase security rules
-├── apphosting.yaml               # Firebase App Hosting config
+│   │   └── api/                  # Backend API routes (Auth, Weather, Guidewire)
+│   ├── ai/                       # AI Orchestration (Genkit, Gemini)
+│   │   ├── genkit.ts             # Genkit configuration
+│   │   └── flows/                # AI Workflows (Pricing, Fraud, Chat)
+│   ├── components/               # UI Components
+│   │   ├── ui/                   # ShadCN base components
+│   │   ├── theme-provider.tsx    # Theme management
+│   │   └── theme-toggle.tsx      # Dark/Light mode switcher
+│   ├── lib/                      # Business Logic & Services
+│   │   ├── firebase.ts           # Firebase Initialization
+│   │   ├── firestore-service.ts  # Universal Firestore CRUD
+│   │   ├── parametric-engine.ts  # Core trigger logic
+│   │   └── guidewire-api.ts      # Cloud integration
+│   ├── models/                   # Legacy MongoDB schemas (Mongoose)
+│   └── hooks/                    # Custom React hooks
+├── public/                       # Static assets & AI images
+├── firestore.rules               # Security rules for persistence layer
 └── package.json
 ```
 
@@ -177,10 +180,12 @@ SurakshaPay-AI/
 - ✅ Worker dashboard with live weather watch
 
 ### Phase 3 — Scale & Optimize ✅
+- ✅ **Premium UI/UX**: Dark/Light mode & Glassmorphism implementation
+- ✅ **Firebase Migration**: Transition to Firestore for real-time persistence
+- ✅ **Redesigned Auth**: Enhanced security and premium login experience
 - ✅ AI fraud detection (GPS spoofing, duplicate claims, activity validation)
 - ✅ Insurer analytics dashboard (loss ratios, predictive alerts, portfolio breakdown)
 - ✅ AI support chat with Gemini
-- ✅ Simulated parametric trigger buttons for demo
 
 ---
 
@@ -188,15 +193,26 @@ SurakshaPay-AI/
 
 ### Prerequisites
 - **Node.js** 18+ and **npm**
-- **MongoDB** connection string
+- **Firebase Project** (with Firestore enabled)
 - **Google AI API Key** (for Gemini 2.5 Flash)
 
 ### Environment Setup
 
-Create a `.env` file in the project root:
+Create a `.env.local` file in the project root:
 
 ```env
+# AI
 GOOGLE_GENAI_API_KEY=your_gemini_api_key
+
+# Firebase (Client-side)
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+NEXT_PUBLIC_FIREBASE_APP_ID=...
+
+# Legacy (Optional)
 MONGODB_URI=your_mongodb_connection_string
 ```
 
@@ -209,18 +225,11 @@ npm install
 # Run the development server (on port 9002)
 npm run dev
 
-# Run Genkit AI development server (optional, for testing flows)
+# Run Genkit AI development server (optional)
 npm run genkit:dev
 ```
 
 Open [http://localhost:9002](http://localhost:9002) in your browser.
-
-### Build for Production
-
-```bash
-npm run build
-npm start
-```
 
 ---
 
@@ -228,13 +237,13 @@ npm start
 
 | Page | Route | Description |
 |---|---|---|
-| **Landing** | `/` | Hero section, features overview, CTAs |
-| **Login** | `/login` | Worker sign-in / registration |
+| **Landing** | `/` | Premium Hero section, features, & CTAs |
+| **Auth** | `/login`, `/register` | Redesigned Glassmorphic worker access |
 | **Onboarding** | `/onboarding` | 4-step wizard: Info → Persona → AI Quote → Policy |
-| **Dashboard** | `/dashboard` | Policy overview, payouts, weather alerts |
-| **Live Triggers** | `/disruptions` | Real-time weather monitoring for 6 cities |
-| **Admin** | `/admin` | Insurer analytics, fraud detection, simulations |
-| **AI Chat** | `/chat` | Support assistant powered by Gemini |
+| **Dashboard** | `/dashboard` | Policy overview, payouts, & live weather watch |
+| **Live Triggers** | `/disruptions` | Real-time weather monitoring for 6 Indian cities |
+| **Admin** | `/admin` | Insurer analytics, fraud detection, & simulations |
+| **AI Chat** | `/chat` | Support assistant powered by Gemini 2.5 Flash |
 
 ---
 
@@ -242,10 +251,10 @@ npm start
 
 1. **Zero-Touch Claims** — No forms, no calls, no waiting. Triggers are data-driven and instant.
 2. **AI-Personalized Pricing** — Every worker gets a unique premium based on city, persona, and real risk data.
-3. **Guidewire-Native** — Full PolicyCenter & ClaimCenter integration, not a bolt-on.
-4. **Weekly Micro-Premiums** — Aligned with gig economy payout cycles (as low as ₹15/week).
-5. **Fraud-Resistant** — AI agent with GPS spoofing detection and duplicate claim prevention.
-6. **Live Data** — Real weather APIs, not simulated data. Triggers fire on actual conditions.
+3. **Premium UX** — Modern dark/light mode interface with glassmorphism for a high-end feel.
+4. **Guidewire-Native** — Full PolicyCenter & ClaimCenter integration, not a bolt-on.
+5. **Real-time Persistence** — Powered by Firestore for instant updates and reliability.
+6. **Fraud-Resistant** — AI agent with GPS spoofing detection and duplicate claim prevention.
 
 ---
 

@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const {
-      firstName, lastName, email, phone, persona,
+      firstName, lastName, email, phone, upiId, persona,
       city, weeklyPremium, riskFactors, explanation,
       guidewirePolicyId,
     } = body;
@@ -47,6 +47,7 @@ export async function POST(request: Request) {
         lastName,
         email,
         phoneNumber: phone,
+        upiId: upiId || 'NOT_SET',
         deliveryPartnerCategory: [persona],
         onboardingDate: Timestamp.now(),
         isActive: true,
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
         firstName: firstName || worker.firstName,
         lastName: lastName || worker.lastName,
         phoneNumber: phone || worker.phoneNumber,
+        upiId: upiId || worker.upiId || 'NOT_SET',
       });
     }
 

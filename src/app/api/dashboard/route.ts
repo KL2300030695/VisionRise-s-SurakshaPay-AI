@@ -101,9 +101,10 @@ export async function GET(request: Request) {
         id: c.id,
         date: c.claimDate,
         status: c.status,
-        amount: c.claimedLostIncomeAmount,
-        payout: c.approvedPayoutAmount,
-        isAutomated: c.isAutomated,
+        amount: c.claimedLostIncomeAmount || 0,
+        payout: c.approvedPayoutAmount || 0,
+        isAutomated: c.isAutomated || false,
+        upiPayoutUrl: c.upiPayoutUrl || ""
       })),
       totalPayouts,
     });

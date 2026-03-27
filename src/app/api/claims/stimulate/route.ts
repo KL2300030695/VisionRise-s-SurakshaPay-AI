@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { FirestoreService } from '@/lib/firestore-service';
 import { intelligentFraudDetection } from '@/ai/flows/intelligent-fraud-detection';
 import { where, Timestamp } from 'firebase/firestore';
+import { generateUpiIntent } from '@/lib/upi-utils';
 
 export async function POST(request: Request) {
   try {
@@ -28,6 +29,12 @@ export async function POST(request: Request) {
     }
 
     // 2. Create a preliminary Claim record in Firestore
+    const upiPayoutUrl = generateUpiIntent(
+      worker.upiId || 'NOT_SET',
+      `${worker.firstName} ${worker.lastName}`,
+      policy.coverageAmountPerDay
+    );
+
     const claim = await FirestoreService.addDocument<any>('claims', {
       gigWorkerId: workerId,
       policyId: policy.id,
@@ -36,7 +43,8 @@ export async function POST(request: Request) {
       claimedLostIncomeAmount: policy.coverageAmountPerDay,
       isAutomated: true,
       stimulationQuery: problemDescription,
-      payoutUpiId: worker.upiId || 'NOT_SET'
+      payoutUpiId: worker.upiId || 'NOT_SET',
+      upiPayoutUrl: upiPayoutUrl
     });
 
     // 3. Run AI Fraud Detection
@@ -77,7 +85,8 @@ export async function POST(request: Request) {
         confidence: fraudResult.confidenceScore
       },
       payoutAmount: finalStatus === 'Paid' ? policy.coverageAmountPerDay : 0,
-      upiId: claim.payoutUpiId
+      upiId: claim.payoutUpiId,
+      upiPayoutUrl: claim.upiPayoutUrl
     });
 
   } catch (error: any) {

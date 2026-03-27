@@ -9,6 +9,7 @@ import {
   where, 
   orderBy, 
   limit, 
+  deleteDoc,
   Timestamp,
   DocumentData,
   QueryConstraint
@@ -78,5 +79,14 @@ export const FirestoreService = {
     const q = query(colRef, ...constraints);
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as (T & { id: string })[];
+  },
+
+  /**
+   * Delete a document by ID
+   */
+  async deleteDocument(collectionName: string, id: string) {
+    const docRef = doc(db, collectionName, id);
+    await deleteDoc(docRef);
+    return true;
   }
 };

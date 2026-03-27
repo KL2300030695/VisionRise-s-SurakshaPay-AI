@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Shield, ChevronLeft, ChevronRight, Loader2, Zap, MapPin, User, IndianRupee, Check, AlertCircle, Bike, ShoppingBag, Package } from 'lucide-react';
 import { aiPoweredPremiumCalculation } from '@/ai/flows/ai-powered-premium-calculation';
+import { validateUpiId } from '@/lib/upi-utils';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -45,6 +46,7 @@ export default function OnboardingPage() {
   const [email, setEmail] = useState('');
   const [persona, setPersona] = useState('');
   const [city, setCity] = useState('');
+  const [upiId, setUpiId] = useState('');
 
   // Premium result
   const [premiumResult, setPremiumResult] = useState<{
@@ -63,14 +65,16 @@ export default function OnboardingPage() {
       const storedLastName = localStorage.getItem('surakshapay_workerLastName') || '';
       const storedEmail = localStorage.getItem('surakshapay_workerEmail') || '';
       const storedPhone = localStorage.getItem('surakshapay_workerPhone') || '';
+      const storedUpi = localStorage.getItem('surakshapay_workerUpi') || '';
 
       if (storedFirstName) setFirstName(storedFirstName);
       if (storedLastName) setLastName(storedLastName);
       if (storedEmail) setEmail(storedEmail);
       if (storedPhone) setPhone(storedPhone);
+      if (storedUpi) setUpiId(storedUpi);
 
       // If everything is present, skip Step 1
-      if (storedFirstName && storedLastName && storedEmail && storedPhone) {
+      if (storedFirstName && storedLastName && storedEmail && storedPhone && storedUpi) {
         setStep(2);
       }
     }
@@ -138,6 +142,7 @@ export default function OnboardingPage() {
           lastName,
           email,
           phone,
+          upiId,
           persona,
           city,
           weeklyPremium: premiumResult?.weeklyPremiumAmountINR,
@@ -154,6 +159,7 @@ export default function OnboardingPage() {
           localStorage.setItem('surakshapay_workerId', dbData.workerId);
           localStorage.setItem('surakshapay_workerName', firstName);
           localStorage.setItem('surakshapay_workerEmail', email);
+          localStorage.setItem('surakshapay_workerUpi', upiId);
         }
         setPolicyId(dbData.policyCenterId);
         setStep(4);
@@ -220,16 +226,41 @@ export default function OnboardingPage() {
                 <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone number" className="h-12 rounded-xl" required />
               </div>
               <div className="space-y-2">
-                <Label className="font-bold text-xs">Email</Label>
-                <Input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="Email address" className="h-12 rounded-xl" required />
+                <Label className="font-bold text-xs uppercase tracking-widest text-primary/70">Payout UPI ID</Label>
+                <div className="relative">
+                  <Input 
+                    value={upiId} 
+                    onChange={e => setUpiId(e.target.value)} 
+                    placeholder="e.g. name@okaxis" 
+                    className="h-12 rounded-xl pr-10 border-primary/20 focus:border-primary transition-all font-medium" 
+                    required 
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Zap className="h-4 w-4 text-orange-500" />
+                  </div>
+                </div>
+                <p className="text-[10px] text-muted-foreground font-medium">Automatic payouts will be sent to this ID instantly.</p>
               </div>
               <Button
                 onClick={() => {
-                  if (!firstName || !lastName || !phone || !email) {
-                    setError('Please fill in all fields.');
+                  if (!firstName || !lastName || !phone || !email || !upiId) {
+                    setError('Please fill in all fields including your professional Payout UPI ID.');
                     return;
                   }
+                  
+                  if (!validateUpiId(upiId)) {
+                    setError('Please enter a valid UPI ID (e.g. name@bank). Check for typos or special characters.');
+                    return;
+                  }
+
                   setError('');
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('surakshapay_workerFirstName', firstName);
+                    localStorage.setItem('surakshapay_workerLastName', lastName);
+                    localStorage.setItem('surakshapay_workerEmail', email);
+                    localStorage.setItem('surakshapay_workerPhone', phone);
+                    localStorage.setItem('surakshapay_workerUpi', upiId);
+                  }
                   setStep(2);
                 }}
                 className="w-full h-12 rounded-xl shadow-lg gap-2"

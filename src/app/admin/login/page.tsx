@@ -13,6 +13,8 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [pin, setPin] = useState('');
+  const [requirePin, setRequirePin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,21 +24,21 @@ export default function AdminLoginPage() {
     setIsLoading(true);
     setError('');
 
-    if (!username || !password) {
-      setError('Please enter your username and password.');
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const res = await fetch('/api/admin-auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, pin }),
       });
       const data = await res.json();
 
       if (data.success) {
+        if (data.requirePin) {
+          setRequirePin(true);
+          setIsLoading(false);
+          return;
+        }
+
         if (typeof window !== 'undefined') {
           localStorage.setItem('surakshapay_adminToken', data.token);
           localStorage.setItem('surakshapay_adminUser', data.admin.username);
@@ -87,44 +89,75 @@ export default function AdminLoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="admin-username" className="text-sm font-bold text-white/70">Username</Label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
-                  <Input
-                    id="admin-username"
-                    placeholder="Enter admin username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="h-12 rounded-xl pl-11 bg-white/10 border-white/10 text-white placeholder:text-white/30 focus:border-secondary focus:ring-secondary"
-                    required
-                    autoFocus
-                  />
-                </div>
-              </div>
+              {!requirePin ? (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-username" className="text-sm font-bold text-white/70">Username</Label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+                      <Input
+                        id="admin-username"
+                        placeholder="Enter admin username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className="h-12 rounded-xl pl-11 bg-white/10 border-white/10 text-white placeholder:text-white/30 focus:border-secondary focus:ring-secondary"
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="admin-password" className="text-sm font-bold text-white/70">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
-                  <Input
-                    id="admin-password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-12 rounded-xl pl-11 pr-12 bg-white/10 border-white/10 text-white placeholder:text-white/30 focus:border-secondary focus:ring-secondary"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-password" className="text-sm font-bold text-white/70">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+                      <Input
+                        id="admin-password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="h-12 rounded-xl pl-11 pr-12 bg-white/10 border-white/10 text-white placeholder:text-white/30 focus:border-secondary focus:ring-secondary"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-4 animate-in slide-in-from-right duration-500">
+                  <div className="p-4 bg-primary/20 border border-primary/30 rounded-2xl flex items-center gap-3">
+                    <Shield className="h-6 w-6 text-white" />
+                    <div>
+                      <p className="text-sm font-bold text-white">Security PIN Required</p>
+                      <p className="text-[10px] text-white/50 uppercase tracking-widest">Two-Step Verification Active</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-pin" className="text-sm font-bold text-white/70">6-Digit PIN</Label>
+                    <div className="relative">
+                      <Shield className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+                      <Input
+                        id="admin-pin"
+                        type="password"
+                        placeholder="••••••"
+                        value={pin}
+                        onChange={(e) => setPin(e.target.value)}
+                        className="h-14 rounded-xl pl-11 bg-white/10 border-white/10 text-white text-2xl tracking-[1em] text-center placeholder:tracking-normal placeholder:text-base focus:border-secondary focus:ring-secondary"
+                        maxLength={6}
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {error && (
                 <div className="flex items-center gap-2 text-sm text-red-300 bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
@@ -141,7 +174,7 @@ export default function AdminLoginPage() {
                 {isLoading ? (
                   <><Loader2 className="h-4 w-4 animate-spin" /> Authenticating...</>
                 ) : (
-                  <><LogIn className="h-4 w-4" /> Access Dashboard</>
+                  requirePin ? <><Shield className="h-4 w-4" /> Verify & Access</> : <><LogIn className="h-4 w-4" /> Access Dashboard</>
                 )}
               </Button>
             </form>

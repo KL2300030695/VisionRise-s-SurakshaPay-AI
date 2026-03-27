@@ -42,6 +42,7 @@ interface DashboardData {
     amount: number;
     payout: number;
     isAutomated: boolean;
+    upiPayoutUrl?: string;
   }>;
   totalPayouts: number;
 }
@@ -319,9 +320,22 @@ export default function DashboardPage() {
                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{formatDate(c.date)} • COMPL-ID: {c.id.toString().slice(-8)}</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-black text-2xl text-green-500 tracking-tighter">+₹{c.payout || c.amount}</p>
-                      <Badge className="bg-green-500/10 text-green-500 border-none font-black text-[10px] uppercase tracking-widest px-3">VERIFIED</Badge>
+                    <div className="text-right flex flex-col items-end gap-2">
+                      <p className="font-black text-2xl text-green-500 tracking-tighter cursor-default">+₹{c.payout || c.amount}</p>
+                      <div className="flex gap-2">
+                        {c.upiPayoutUrl ? (
+                          <Button 
+                            size="sm" 
+                            variant="default" 
+                            className="bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest px-3 h-7 rounded-full shadow-lg transition-all hover:scale-105"
+                            onClick={() => window.open(c.upiPayoutUrl, '_blank')}
+                          >
+                            Collect Payout
+                          </Button>
+                        ) : (
+                          <Badge className="bg-green-500/10 text-green-500 border-none font-black text-[10px] uppercase tracking-widest px-3">VERIFIED</Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}

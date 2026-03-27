@@ -3,17 +3,23 @@
 import { intelligentFraudDetection } from '@/ai/flows/intelligent-fraud-detection';
 import { FirestoreService } from '@/lib/firestore-service';
 import { where, Timestamp } from 'firebase/firestore';
+import { generateUpiIntent } from './upi-utils';
 
 /**
  * Mock Payment Gateway Integration
  */
-async function initiateMockPayout(amount: number, workerId: string) {
-  console.log(`[MOCK API] Initiating payout of ₹${amount} to worker ${workerId} via UPI...`);
+async function initiateMockPayout(amount: number, workerId: string, upiId: string, workerName: string) {
+  console.log(`[UPI AUTOMATION] Generating payout link for ₹${amount} to ${workerName} (${upiId})...`);
+  
+  const upiUrl = generateUpiIntent(upiId, workerName, amount);
+  
   await new Promise(resolve => setTimeout(resolve, 1200));
+  
   return {
     success: true,
     gatewayTransactionId: `PG_UPI_${Math.random().toString(36).substring(7).toUpperCase()}`,
-    status: 'COMPLETED'
+    status: 'COMPLETED',
+    upiPayoutUrl: upiUrl
   };
 }
 
@@ -76,12 +82,18 @@ export async function simulateParametricTrigger(
 
         // 5. Process Payout if legitimate
         if (!fraudResult.isFraudulent && fraudResult.confidenceScore > 0.7) {
-          await initiateMockPayout(claim.claimedLostIncomeAmount, workerId);
+          // Fetch worker details for UPI
+          const worker = await FirestoreService.getDocument<any>('workers', workerId);
+          const upiId = worker?.upiId || 'NOT_SET';
+          const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'Gig Worker';
+
+          const payoutResult = await initiateMockPayout(claim.claimedLostIncomeAmount, workerId, upiId, workerName);
 
           await FirestoreService.updateDocument('claims', claim.id, {
             status: 'Paid',
             fraudScore: Math.round((1 - fraudResult.confidenceScore) * 100),
             approvedPayoutAmount: claim.claimedLostIncomeAmount,
+            upiPayoutUrl: payoutResult.upiPayoutUrl,
             lastUpdatedDate: Timestamp.now()
           });
         } else {

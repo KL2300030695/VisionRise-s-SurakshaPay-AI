@@ -88,8 +88,12 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && data.worker) {
           localStorage.setItem('surakshapay_workerId', data.workerId);
+          localStorage.setItem('surakshapay_workerFirstName', data.worker.firstName || '');
+          localStorage.setItem('surakshapay_workerLastName', data.worker.lastName || '');
+          localStorage.setItem('surakshapay_workerEmail', data.worker.email || '');
+          localStorage.setItem('surakshapay_workerPhone', data.worker.phone || '');
         }
         setSuccess(data.message);
         setTimeout(() => {

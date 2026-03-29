@@ -208,9 +208,18 @@ export default function OnboardingPage() {
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" /> Personal Details
               </CardTitle>
-              <CardDescription>Tell us a bit about yourself</CardDescription>
+              <CardDescription>
+                {firstName ? `Welcome back, ${firstName}! Please confirm your details.` : 'Tell us a bit about yourself'}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {firstName && (
+                <div className="p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-center gap-2 mb-2 animate-in fade-in slide-in-from-top-2 duration-500">
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
+                  <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Profile Found from Login</p>
+                </div>
+              )}
+              
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="font-bold text-xs">First Name</Label>
@@ -221,26 +230,36 @@ export default function OnboardingPage() {
                   <Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last name" className="h-12 rounded-xl" required />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label className="font-bold text-xs">Phone Number</Label>
-                <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone number" className="h-12 rounded-xl" required />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="font-bold text-xs">Phone Number</Label>
+                  <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone number" className="h-12 rounded-xl" required />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-bold text-xs">Email Address</Label>
+                  <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className="h-12 rounded-xl bg-muted/20" required />
+                </div>
               </div>
+
               <div className="space-y-2">
-                <Label className="font-bold text-xs uppercase tracking-widest text-primary/70">Payout UPI ID</Label>
+                <Label className="font-bold text-xs uppercase tracking-widest text-primary font-headline">Payout UPI ID <span className="text-red-500">*</span></Label>
                 <div className="relative">
                   <Input 
                     value={upiId} 
                     onChange={e => setUpiId(e.target.value)} 
                     placeholder="e.g. name@okaxis" 
-                    className="h-12 rounded-xl pr-10 border-primary/20 focus:border-primary transition-all font-medium" 
+                    className="h-14 rounded-xl pr-10 border-primary/30 focus:border-primary transition-all font-bold text-lg shadow-inner bg-primary/5" 
                     required 
+                    autoFocus={!!firstName}
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <Zap className="h-4 w-4 text-orange-500" />
+                    <Zap className="h-5 w-5 text-orange-500" />
                   </div>
                 </div>
-                <p className="text-[10px] text-muted-foreground font-medium">Automatic payouts will be sent to this ID instantly.</p>
+                <p className="text-[10px] text-muted-foreground font-medium">This is where your insurance payouts will be sent instantly.</p>
               </div>
+
               <Button
                 onClick={() => {
                   if (!firstName || !lastName || !phone || !email || !upiId) {
@@ -263,11 +282,11 @@ export default function OnboardingPage() {
                   }
                   setStep(2);
                 }}
-                className="w-full h-12 rounded-xl shadow-lg gap-2"
+                className="w-full h-14 rounded-xl shadow-xl gap-2 font-bold text-base"
               >
-                Continue <ChevronRight className="h-4 w-4" />
+                Save Details & Continue <ChevronRight className="h-4 w-4" />
               </Button>
-              {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg flex items-center gap-2"><AlertCircle className="h-4 w-4" />{error}</p>}
+              {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg flex items-center gap-2 font-bold animate-shake"><AlertCircle className="h-4 w-4" />{error}</p>}
             </CardContent>
           </Card>
         )}

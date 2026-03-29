@@ -12,6 +12,16 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// Server-side logging for diagnostics
+if (typeof window === "undefined") {
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+    console.warn("⚠️ Firebase Configuration is incomplete! Check your Vercel Environment Variables.");
+    console.log("Config keys present:", Object.entries(firebaseConfig).filter(([_, v]) => !!v).map(([k]) => k));
+  } else {
+    console.log("✅ Firebase initialized successfully with Project ID:", firebaseConfig.projectId);
+  }
+}
+
 // Initialize Firebase
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);

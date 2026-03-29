@@ -7,6 +7,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { email, password, action } = body;
+    
+    console.log(`[Auth API] Request received: action=${action}, email=${email}`);
 
     if (!email) {
       return NextResponse.json(

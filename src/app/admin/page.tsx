@@ -104,21 +104,23 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('surakshapay_adminToken');
-    const user = localStorage.getItem('surakshapay_adminUser');
-    if (!token) {
-      router.replace('/admin/login');
-    } else {
-      setIsAuthed(true);
-      setAdminUser(user || 'Admin');
-      fetchWorkers();
-    }
+    // Middleware handles the heavy lifting, but we still need the username for the UI
+    const adminUser = localStorage.getItem('surakshapay_adminUser');
+    setAdminUser(adminUser || 'Admin');
+    setIsAuthed(true); // Since middleware already verified the cookie
+    fetchWorkers();
   }, [router]);
 
-  const handleSignOut = () => {
-    localStorage.removeItem('surakshapay_adminToken');
-    localStorage.removeItem('surakshapay_adminUser');
-    router.replace('/admin/login');
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/admin-auth/logout', { method: 'POST' });
+      localStorage.removeItem('surakshapay_adminUser');
+      router.replace('/admin/login');
+    } catch (err) {
+      console.error("Logout failed", err);
+      // Fallback redirect
+      router.replace('/admin/login');
+    }
   };
 
   if (!isAuthed) {

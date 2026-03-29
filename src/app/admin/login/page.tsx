@@ -40,7 +40,6 @@ export default function AdminLoginPage() {
         }
 
         if (typeof window !== 'undefined') {
-          localStorage.setItem('surakshapay_adminToken', data.token);
           localStorage.setItem('surakshapay_adminUser', data.admin.username);
         }
         router.push('/admin');

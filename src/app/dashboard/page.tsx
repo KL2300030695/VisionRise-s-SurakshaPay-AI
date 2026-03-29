@@ -384,7 +384,7 @@ export default function DashboardPage() {
             </Link>
           </Button>
           <Button variant="outline" asChild className="h-20 rounded-[1.5rem] justify-start gap-4 px-6 shadow-xl border-none bg-white dark:bg-black/40 hover:bg-primary/5 transition-all group">
-            <Link href="/admin">
+            <Link href="/admin/login">
                <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform">
                 <Activity className="h-6 w-6" />
               </div>

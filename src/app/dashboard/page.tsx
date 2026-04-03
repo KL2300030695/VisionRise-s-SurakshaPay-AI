@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, CloudRain, MessageCircle, Zap, IndianRupee, MapPin, Clock, ChevronRight, Eye, CalendarDays, Activity, TrendingUp, Loader2, AlertCircle } from 'lucide-react';
+import { Shield, CloudRain, MessageCircle, Zap, IndianRupee, MapPin, Clock, ChevronRight, Eye, CalendarDays, Activity, TrendingUp, Loader2, AlertCircle, BrainCircuit, FileText } from 'lucide-react';
 import { ReportIssueDialog } from '@/components/report-issue-dialog';
 import { ThemeToggle } from '@/components/theme-toggle';
 
@@ -355,7 +355,29 @@ export default function DashboardPage() {
         </Card>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Button variant="outline" asChild className="h-20 rounded-[1.5rem] justify-start gap-4 px-6 shadow-xl border-none bg-white dark:bg-black/40 hover:bg-primary/5 transition-all group">
+            <Link href="/policy">
+              <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                <Shield className="h-6 w-6" />
+              </div>
+              <div className="text-left">
+                <p className="font-black text-sm tracking-tight">My Policy</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">AI Pricing</p>
+              </div>
+            </Link>
+          </Button>
+          <Button variant="outline" asChild className="h-20 rounded-[1.5rem] justify-start gap-4 px-6 shadow-xl border-none bg-white dark:bg-black/40 hover:bg-primary/5 transition-all group">
+            <Link href="/claims">
+              <div className="p-2.5 rounded-xl bg-green-500/10 text-green-500 group-hover:scale-110 transition-transform">
+                <FileText className="h-6 w-6" />
+              </div>
+              <div className="text-left">
+                <p className="font-black text-sm tracking-tight">Claims</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Zero-Touch</p>
+              </div>
+            </Link>
+          </Button>
           <ReportIssueDialog 
             workerId={worker?.id || ""} 
             location={location?.city || "Unknown"} 

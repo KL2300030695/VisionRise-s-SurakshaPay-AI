@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Shield, Zap, CloudRain, BarChart3, ChevronRight, LogIn } from 'lucide-react';
+import { Shield, Zap, CloudRain, BarChart3, ChevronRight, LogIn, BrainCircuit, Cpu, Activity, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -191,9 +191,9 @@ export default function Home() {
              <div className="grid md:grid-cols-4 gap-8">
                 {[
                   { step: "01", title: "Select Profile", desc: "Choose your persona (Zomato, Swiggy, Amazon, etc.) and operating city." },
-                  { step: "02", title: "AI Quote", desc: "Get an instant weekly quote based on historical disruption data." },
-                  { step: "03", title: "Auto-Monitor", desc: "Our engine tracks rain, heat, and city events 24/7." },
-                  { step: "04", title: "Instant Payout", desc: "Disruption detected? Money hits your UPI in under 5 minutes." },
+                  { step: "02", title: "AI Dynamic Quote", desc: "Get a personalized weekly premium using 5 ML-powered risk factors including zone safety & weather forecasts." },
+                  { step: "03", title: "5-Source Monitoring", desc: "Our engine auto-scans weather, AQI, flood alerts, and civil disruptions across 5 live APIs." },
+                  { step: "04", title: "Zero-Touch Payout", desc: "Trigger detected → AI validates → Guidewire syncs → ₹500 UPI payout in 4.2 minutes. No forms." },
                 ].map((s, i) => (
                   <div key={i} className="relative p-8 bg-white rounded-3xl shadow-xl hover:shadow-primary/5 transition-all">
                     <span className="text-6xl font-black text-primary/5 absolute top-4 right-4">{s.step}</span>
@@ -204,6 +204,75 @@ export default function Home() {
                   </div>
                 ))}
              </div>
+          </div>
+        </section>
+
+        {/* Phase 2: Automation & Protection Features */}
+        <section className="py-24 px-6 lg:px-12 bg-white">
+          <div className="container mx-auto">
+            <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+              <Badge className="bg-green-100 text-green-700 font-black rounded-lg px-3 py-1 mb-2 hover:bg-green-100 border-none">PHASE 2 — AUTOMATION</Badge>
+              <h2 className="text-4xl md:text-5xl font-black font-headline text-primary tracking-tighter">Protect Your Worker. Automatically.</h2>
+              <p className="text-muted-foreground text-lg font-medium">Five layers of automated protection powered by real APIs and AI</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: BrainCircuit,
+                  title: "Dynamic AI Pricing",
+                  desc: "ML-powered premiums that adjust based on zone-level weather history, seasonal patterns, and your claim track record. Workers in safe zones pay ₹2-3 less per week.",
+                  color: "bg-purple-500/10 text-purple-600",
+                  tag: "AI/ML"
+                },
+                {
+                  icon: CloudRain,
+                  title: "Live Weather Triggers",
+                  desc: "Open-Meteo API monitors rain (>8mm), heat (>42°C), and wind (>20m/s) across 6 Indian cities in real-time.",
+                  color: "bg-blue-500/10 text-blue-600",
+                  tag: "Live API"
+                },
+                {
+                  icon: Activity,
+                  title: "Air Quality Monitoring",
+                  desc: "Open-Meteo AQI API tracks pollution levels. When Indian AQI exceeds 400, claims are auto-created for affected delivery partners.",
+                  color: "bg-orange-500/10 text-orange-600",
+                  tag: "Live API"
+                },
+                {
+                  icon: Zap,
+                  title: "Flood & Cyclone Alerts",
+                  desc: "Mock IMD API detects flood warnings and cyclone alerts. Orange/Red level alerts trigger instant income protection.",
+                  color: "bg-red-500/10 text-red-600",
+                  tag: "Mock API"
+                },
+                {
+                  icon: Shield,
+                  title: "Urban Disruption Shield",
+                  desc: "Civil Alert API monitors bandhs, curfews, and VIP movement closures. Major disruptions auto-trigger payouts for all city workers.",
+                  color: "bg-slate-500/10 text-slate-600",
+                  tag: "Mock API"
+                },
+                {
+                  icon: Cpu,
+                  title: "Zero-Touch Claims",
+                  desc: "The entire pipeline — detect, validate, adjudicate, pay — runs without any human intervention. Average payout time: 4.2 minutes.",
+                  color: "bg-green-500/10 text-green-600",
+                  tag: "Automated"
+                },
+              ].map((feat, i) => (
+                <Card key={i} className="border-none shadow-xl bg-white rounded-[2rem] p-8 hover:translate-y-[-4px] transition-all duration-500 group">
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className={`h-14 w-14 rounded-2xl ${feat.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                      <feat.icon className="h-7 w-7" />
+                    </div>
+                    <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest">{feat.tag}</Badge>
+                  </div>
+                  <h3 className="text-lg font-black font-headline tracking-tight text-primary mb-2">{feat.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed font-medium">{feat.desc}</p>
+                </Card>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -255,6 +324,8 @@ export default function Home() {
               <ul className="space-y-3 text-sm font-bold text-muted-foreground">
                 <li><Link href="/admin/login" className="hover:text-primary">Insurer Portal</Link></li>
                 <li><Link href="/chat" className="hover:text-primary">Support Chat</Link></li>
+                <li><Link href="/policy" className="hover:text-primary">Policy Management</Link></li>
+                <li><Link href="/claims" className="hover:text-primary">Claims Tracker</Link></li>
                 <li><Link href="https://guidewire.com" target="_blank" className="hover:text-primary">Guidewire Cloud</Link></li>
               </ul>
             </div>

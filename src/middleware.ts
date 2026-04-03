@@ -10,10 +10,8 @@ export function middleware(request: NextRequest) {
   }
 
   // 2. Protect all routes under /admin and /api/admin
-  // Also protect sensitive Guidewire simulation routes
   const isProtectedPath = pathname.startsWith('/admin') || 
-                          pathname.startsWith('/api/admin') || 
-                          pathname.startsWith('/api/guidewire');
+                          pathname.startsWith('/api/admin');
 
   if (isProtectedPath) {
     const adminSession = request.cookies.get('surakshapay_admin_session')?.value;
@@ -41,6 +39,5 @@ export const config = {
   matcher: [
     '/admin/:path*', 
     '/api/admin/:path*',
-    '/api/guidewire/:path*'
   ],
 };

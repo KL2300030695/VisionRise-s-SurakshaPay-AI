@@ -406,10 +406,12 @@ export default function ClaimsPage() {
                           <Button
                             size="sm"
                             variant="default"
+                            asChild
                             className="h-6 px-2 text-[9px] font-black uppercase rounded-full"
-                            onClick={() => window.open(claim.upiPayoutUrl!, '_blank')}
                           >
-                            <ExternalLink className="h-2.5 w-2.5 mr-1" /> Collect
+                            <Link href={`/payout/simulate?amount=${claim.payout || claim.amount}&claimId=${claim.id}`}>
+                              <ExternalLink className="h-2.5 w-2.5 mr-1" /> Collect
+                            </Link>
                           </Button>
                         )}
                       </div>

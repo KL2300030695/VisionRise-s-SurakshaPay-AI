@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, CloudRain, MessageCircle, Zap, IndianRupee, MapPin, Clock, ChevronRight, Eye, CalendarDays, Activity, TrendingUp, Loader2, AlertCircle, BrainCircuit, FileText } from 'lucide-react';
+import { Shield, CloudRain, MessageCircle, Zap, IndianRupee, MapPin, Clock, ChevronRight, Eye, CalendarDays, Activity, TrendingUp, Loader2, AlertCircle, BrainCircuit, FileText, ExternalLink } from 'lucide-react';
 import { ReportIssueDialog } from '@/components/report-issue-dialog';
 import { ThemeToggle } from '@/components/theme-toggle';
 
@@ -139,6 +139,11 @@ export default function DashboardPage() {
 
   const { worker, policy, location, claims, totalPayouts } = dashData;
 
+  // Store worker name for payout simulator
+  if (typeof window !== 'undefined' && worker) {
+    localStorage.setItem('surakshapay_workerName', `${worker.firstName} ${worker.lastName}`);
+  }
+
   // Extract persona label from the full persona string
   const personaLabel = worker?.persona?.split('(')[0]?.trim() || worker?.persona || 'Delivery Partner';
   const personaPlatform = worker?.persona?.match(/\(([^)]+)\)/)?.[1] || '';
@@ -182,7 +187,7 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-black font-headline text-primary tracking-tight">
             Welcome, {worker?.firstName || 'Rider'}! 🏍️
           </h1>
-          <p className="text-muted-foreground font-medium small-caps tracking-widest text-xs">Real-time parametric protection active</p>
+          <p className="text-muted-foreground font-medium small-caps tracking-widest text-xs">Active weekly coverage • Earnings protected in real-time</p>
         </div>
 
         {/* Quick Stats */}
@@ -191,7 +196,7 @@ export default function DashboardPage() {
             <CardContent className="pt-6 text-center">
               <Shield className="h-6 w-6 mx-auto text-green-500 mb-2" />
               <p className="text-2xl font-black text-green-500">{policy?.status || 'N/A'}</p>
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1">Status</p>
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1">Weekly Coverage</p>
             </CardContent>
           </Card>
           <Card className="border-none shadow-xl bg-white/50 dark:bg-muted/30 backdrop-blur-md rounded-2xl transition-all hover:scale-105">
@@ -205,7 +210,7 @@ export default function DashboardPage() {
             <CardContent className="pt-6 text-center">
               <Zap className="h-6 w-6 mx-auto text-orange-500 mb-2" />
               <p className="text-2xl font-black">₹{totalPayouts}</p>
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1">Total Paid</p>
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1">Earnings Protected</p>
             </CardContent>
           </Card>
           <Card className="border-none shadow-xl bg-white/50 dark:bg-muted/30 backdrop-blur-md rounded-2xl transition-all hover:scale-105">
@@ -327,10 +332,12 @@ export default function DashboardPage() {
                           <Button 
                             size="sm" 
                             variant="default" 
-                            className="bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest px-3 h-7 rounded-full shadow-lg transition-all hover:scale-105"
-                            onClick={() => window.open(c.upiPayoutUrl, '_blank')}
+                            asChild
+                            className="h-6 px-2 text-[9px] font-black uppercase rounded-full shadow-lg transition-all hover:scale-105"
                           >
-                            Collect Payout
+                            <Link href={`/payout/simulate?amount=${c.payout || c.amount}&claimId=${c.id}`}>
+                              <ExternalLink className="h-2.5 w-2.5 mr-1" /> Collect
+                            </Link>
                           </Button>
                         ) : (
                           <Badge className="bg-green-500/10 text-green-500 border-none font-black text-[10px] uppercase tracking-widest px-3">VERIFIED</Badge>

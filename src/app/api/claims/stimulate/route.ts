@@ -6,7 +6,7 @@ import { generateUpiIntent } from '@/lib/upi-utils';
 
 export async function POST(request: Request) {
   try {
-    const { workerId, problemDescription, location } = await request.json();
+    const { workerId, problemDescription, location, workerActivityLog } = await request.json();
 
     if (!workerId || !problemDescription || !location) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
@@ -47,30 +47,35 @@ export async function POST(request: Request) {
       upiPayoutUrl: upiPayoutUrl
     });
 
-    // 3. Run AI Fraud Detection
+    // 3. Run Phase 3 Advanced AI Fraud Detection (4-tool pipeline)
     const fraudResult = await intelligentFraudDetection({
       claimId: claim.id,
       workerId: workerId,
       claimDetails: problemDescription,
       claimLocation: location,
       claimTime: new Date().toISOString(),
+      // Pass activity log for GPS spoofing detection (Phase 3 requirement)
+      workerActivityLog: workerActivityLog || undefined,
     });
 
-    // 4. Update claim based on AI result
+    // 4. Determine final claim status based on AI fraud result
     let finalStatus = 'Approved';
     if (fraudResult.isFraudulent) {
-      finalStatus = 'Fraudulent';
+      finalStatus = fraudResult.recommendedAction === 'deny claim' ? 'Denied' : 'Flagged';
     }
 
-    // If approved, simulate payment by marking as Paid
+    // If approved, simulate instant payment by marking as Paid
     if (finalStatus === 'Approved') {
       finalStatus = 'Paid';
     }
 
+    // 5. Update claim with full fraud audit trail
     await FirestoreService.updateDocument('claims', claim.id, {
       status: finalStatus,
       fraudScore: fraudResult.confidenceScore,
       fraudReason: fraudResult.fraudReason,
+      fraudAnomalies: fraudResult.flaggedAnomalies || [],
+      fraudRecommendation: fraudResult.recommendedAction,
       approvedPayoutAmount: finalStatus === 'Paid' ? policy.coverageAmountPerDay : 0,
       lastUpdatedDate: Timestamp.now()
     });
@@ -82,11 +87,13 @@ export async function POST(request: Request) {
       fraudResult: {
         isFraudulent: fraudResult.isFraudulent,
         reason: fraudResult.fraudReason,
-        confidence: fraudResult.confidenceScore
+        confidence: fraudResult.confidenceScore,
+        anomalies: fraudResult.flaggedAnomalies || [],
+        recommendation: fraudResult.recommendedAction,
       },
       payoutAmount: finalStatus === 'Paid' ? policy.coverageAmountPerDay : 0,
-      upiId: claim.payoutUpiId,
-      upiPayoutUrl: claim.upiPayoutUrl
+      upiId: worker.upiId || 'NOT_SET',
+      upiPayoutUrl: upiPayoutUrl,
     });
 
   } catch (error: any) {

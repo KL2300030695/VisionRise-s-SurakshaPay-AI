@@ -243,36 +243,70 @@ async function processGenericTrigger(
 
     for (const policy of activePolicies) {
       try {
-        // 4. Create claim
+        // 4. Create claim (initially as Initiated — pending fraud check)
         const claim = await FirestoreService.addDocument<any>('claims', {
           gigWorkerId: policy.gigWorkerId,
           policyId: policy.id,
           disruptionEventId: disruptionEvent.id,
           claimDate: Timestamp.now(),
-          status: 'Paid',
+          status: 'Initiated',
           claimedLostIncomeAmount: payoutAmount,
-          approvedPayoutAmount: payoutAmount,
           isAutomated: true,
           triggerSource: source,
           triggerType: subType,
           lastUpdatedDate: Timestamp.now(),
         });
 
-        // 5. Generate UPI payout link
-        const worker = await FirestoreService.getDocument<any>('workers', policy.gigWorkerId);
-        if (worker) {
-          const upiId = worker.upiId || 'NOT_SET';
-          const workerName = `${worker.firstName} ${worker.lastName}`;
-          const upiUrl = generateUpiIntent(upiId, workerName, payoutAmount);
-
-          await FirestoreService.updateDocument('claims', claim.id, {
-            upiPayoutUrl: upiUrl,
-            status: 'Paid',
+        // 5. Run lightweight fraud screening (Phase 3: all claims go through AI audit)
+        let fraudPassed = true;
+        try {
+          const { intelligentFraudDetection } = await import('@/ai/flows/intelligent-fraud-detection');
+          const fraudResult = await intelligentFraudDetection({
+            claimId: claim.id,
+            workerId: policy.gigWorkerId,
+            claimDetails: `Automated ${subType} claim triggered by ${source} in ${city}. Severity: ${severity}.`,
+            claimLocation: city,
+            claimTime: new Date().toISOString(),
           });
+
+          // Store fraud audit trail
+          await FirestoreService.updateDocument('claims', claim.id, {
+            fraudScore: fraudResult.confidenceScore,
+            fraudReason: fraudResult.fraudReason,
+            fraudAnomalies: fraudResult.flaggedAnomalies || [],
+            fraudRecommendation: fraudResult.recommendedAction,
+          });
+
+          if (fraudResult.isFraudulent) {
+            fraudPassed = false;
+            await FirestoreService.updateDocument('claims', claim.id, {
+              status: 'Flagged',
+              approvedPayoutAmount: 0,
+            });
+          }
+        } catch (fraudErr) {
+          // If fraud detection fails, don't block the payout — log and continue
+          console.warn(`[AutoScan] Fraud check failed for claim ${claim.id}, proceeding with payout:`, fraudErr);
         }
 
-        claimsCreated++;
-        totalPayout += payoutAmount;
+        // 6. Generate UPI payout link (only if fraud check passed)
+        if (fraudPassed) {
+          const worker = await FirestoreService.getDocument<any>('workers', policy.gigWorkerId);
+          if (worker) {
+            const upiId = worker.upiId || 'NOT_SET';
+            const workerName = `${worker.firstName} ${worker.lastName}`;
+            const upiUrl = generateUpiIntent(upiId, workerName, payoutAmount);
+
+            await FirestoreService.updateDocument('claims', claim.id, {
+              upiPayoutUrl: upiUrl,
+              status: 'Paid',
+              approvedPayoutAmount: payoutAmount,
+            });
+          }
+
+          claimsCreated++;
+          totalPayout += payoutAmount;
+        }
       } catch (claimErr) {
         console.error(`[AutoScan] Claim creation error for policy ${policy.id}:`, claimErr);
       }

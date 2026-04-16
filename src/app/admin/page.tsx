@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Shield, Users, CloudRain, BarChart3, AlertTriangle, TrendingUp, IndianRupee, MapPin, Zap, Loader2, ThermometerSun, BrainCircuit, Activity, LogOut, Plus, Trash2, Search } from 'lucide-react';
+import { Shield, Users, CloudRain, BarChart3, AlertTriangle, TrendingUp, TrendingDown, IndianRupee, MapPin, Zap, Loader2, ThermometerSun, BrainCircuit, Activity, LogOut, Plus, Trash2, Search, Eye, Droplets, Wind, Gauge } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
-import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, Pie, PieChart } from 'recharts';
+import { Area, AreaChart, Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, Pie, PieChart, CartesianGrid, Legend } from 'recharts';
 import { simulateParametricTrigger } from '@/lib/parametric-engine';
 import { validateUpiId } from '@/lib/upi-utils';
 import { useToast } from '@/hooks/use-toast';
@@ -17,13 +17,38 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 
 const chartConfig = {
   payouts: {
     label: "Payouts",
     color: "hsl(var(--primary))",
   },
+  premiums: {
+    label: "Premiums Collected",
+    color: "#22c55e",
+  },
 } satisfies ChartConfig;
+
+// Predictive analytics data — simulated ML forecast for next week
+const predictiveData = [
+  { city: 'Mumbai', riskType: 'Heavy Rainfall', probability: 92, expectedClaims: 145, estimatedPayout: 72500, trend: 'up', riskLevel: 'Critical' },
+  { city: 'Delhi', riskType: 'Extreme Heat', probability: 78, expectedClaims: 89, estimatedPayout: 44500, trend: 'up', riskLevel: 'High' },
+  { city: 'Chennai', riskType: 'Cyclone Watch', probability: 65, expectedClaims: 62, estimatedPayout: 46500, trend: 'stable', riskLevel: 'High' },
+  { city: 'Kolkata', riskType: 'Flood Alert', probability: 54, expectedClaims: 38, estimatedPayout: 19000, trend: 'down', riskLevel: 'Medium' },
+  { city: 'Bangalore', riskType: 'Waterlogging', probability: 41, expectedClaims: 22, estimatedPayout: 11000, trend: 'down', riskLevel: 'Medium' },
+  { city: 'Hyderabad', riskType: 'Poor AQI', probability: 33, expectedClaims: 15, estimatedPayout: 7500, trend: 'stable', riskLevel: 'Low' },
+];
+
+// Weekly loss ratio trend
+const lossRatioTrend = [
+  { week: 'W1', lossRatio: 28, premiums: 312000, claims: 87360 },
+  { week: 'W2', lossRatio: 32, premiums: 318000, claims: 101760 },
+  { week: 'W3', lossRatio: 45, premiums: 324000, claims: 145800 },
+  { week: 'W4', lossRatio: 38, premiums: 330000, claims: 125400 },
+  { week: 'W5', lossRatio: 34, premiums: 336000, claims: 114240 },
+  { week: 'W6', lossRatio: 31, premiums: 342000, claims: 106020 },
+];
 
 export default function AdminPage() {
   const router = useRouter();
@@ -175,27 +200,36 @@ export default function AdminPage() {
   };
 
   const stats = [
-    { label: 'Active Policies', value: '12,482', icon: Shield, trend: '+12%', color: 'text-blue-500' },
-    { label: 'Total Premiums', value: '₹18.2L', icon: IndianRupee, trend: '+8%', color: 'text-green-500' },
-    { label: 'Loss Ratio', value: '34.2%', icon: Activity, trend: '-2.1%', color: 'text-orange-500' },
-    { label: 'Fraud Prevention', value: '₹2.4L', icon: BrainCircuit, trend: '+15%', color: 'text-purple-500' },
+    { label: 'Active Policies', value: '12,482', icon: Shield, trend: '+12%', color: 'text-blue-500', trendDir: 'up' },
+    { label: 'Total Premiums', value: '₹18.2L', icon: IndianRupee, trend: '+8%', color: 'text-green-500', trendDir: 'up' },
+    { label: 'Loss Ratio', value: '34.2%', icon: Gauge, trend: '-2.1%', color: 'text-orange-500', trendDir: 'down' },
+    { label: 'Fraud Prevented', value: '₹2.4L', icon: BrainCircuit, trend: '+15%', color: 'text-purple-500', trendDir: 'up' },
   ];
 
   const chartData = [
-    { name: 'Mon', claims: 12, payouts: 4500 },
-    { name: 'Tue', claims: 19, payouts: 6200 },
-    { name: 'Wed', claims: 45, payouts: 15400 },
-    { name: 'Thu', claims: 32, payouts: 11000 },
-    { name: 'Fri', claims: 28, payouts: 9800 },
-    { name: 'Sat', claims: 55, payouts: 22000 },
-    { name: 'Sun', claims: 48, payouts: 18500 },
+    { name: 'Mon', claims: 12, payouts: 4500, premiums: 8200 },
+    { name: 'Tue', claims: 19, payouts: 6200, premiums: 8400 },
+    { name: 'Wed', claims: 45, payouts: 15400, premiums: 8600 },
+    { name: 'Thu', claims: 32, payouts: 11000, premiums: 8800 },
+    { name: 'Fri', claims: 28, payouts: 9800, premiums: 9000 },
+    { name: 'Sat', claims: 55, payouts: 22000, premiums: 9200 },
+    { name: 'Sun', claims: 48, payouts: 18500, premiums: 9400 },
   ];
 
   const personaDistribution = [
     { name: 'Food', value: 4500, color: 'hsl(var(--primary))' },
-    { name: 'Grocery', value: 3200, color: 'hsl(var(--secondary))' },
+    { name: 'Grocery', value: 3200, color: '#22c55e' },
     { name: 'E-commerce', value: 2800, color: '#3b82f6' },
   ];
+
+  const getRiskColor = (level: string) => {
+    switch(level) {
+      case 'Critical': return 'bg-red-500/10 text-red-500 border-red-500/20';
+      case 'High': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
+      case 'Medium': return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20';
+      default: return 'bg-green-500/10 text-green-500 border-green-500/20';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-12 space-y-10 animate-in fade-in duration-1000">
@@ -243,11 +277,15 @@ export default function AdminPage() {
           <TabsTrigger value="analytics" className="rounded-xl px-6 font-black text-xs uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
             <BarChart3 className="h-3.5 w-3.5 mr-2" /> Analytics
           </TabsTrigger>
+          <TabsTrigger value="predictive" className="rounded-xl px-6 font-black text-xs uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+            <Eye className="h-3.5 w-3.5 mr-2" /> Predictive Analytics
+          </TabsTrigger>
           <TabsTrigger value="workers" className="rounded-xl px-6 font-black text-xs uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
             <Users className="h-3.5 w-3.5 mr-2" /> Manage Workers
           </TabsTrigger>
         </TabsList>
 
+        {/* ========== ANALYTICS TAB ========== */}
         <TabsContent value="analytics" className="space-y-10 focus-visible:ring-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, i) => (
@@ -257,8 +295,8 @@ export default function AdminPage() {
                     <div className="p-4 rounded-2xl bg-muted/40 dark:bg-muted/10">
                       <stat.icon className={`h-6 w-6 ${stat.color}`} />
                     </div>
-                    <Badge className="bg-green-500/10 text-green-500 border-none px-3 py-1 font-black text-[10px] tracking-widest uppercase">
-                      <TrendingUp className="h-3 w-3 mr-1" /> {stat.trend}
+                    <Badge className={`${stat.trendDir === 'down' && stat.label === 'Loss Ratio' ? 'bg-green-500/10 text-green-500' : 'bg-green-500/10 text-green-500'} border-none px-3 py-1 font-black text-[10px] tracking-widest uppercase`}>
+                      {stat.trendDir === 'down' ? <TrendingDown className="h-3 w-3 mr-1" /> : <TrendingUp className="h-3 w-3 mr-1" />} {stat.trend}
                     </Badge>
                   </div>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{stat.label}</p>
@@ -272,7 +310,7 @@ export default function AdminPage() {
             <Card className="lg:col-span-2 shadow-2xl border-none rounded-[2.5rem] bg-white/50 dark:bg-black/20 backdrop-blur-2xl overflow-hidden p-6">
               <CardHeader className="px-4">
                 <CardTitle className="text-2xl font-black font-headline tracking-tight">System Liquidity Overview</CardTitle>
-                <CardDescription className="text-sm font-medium">Automatic parametric claim payouts vs. reserves (INR)</CardDescription>
+                <CardDescription className="text-sm font-medium">Automatic parametric claim payouts vs. premium reserves (INR)</CardDescription>
               </CardHeader>
               <CardContent className="h-[400px] pt-8">
                 <ChartContainer config={chartConfig} className="h-full w-full">
@@ -282,10 +320,15 @@ export default function AdminPage() {
                         <stop offset="5%" stopColor="var(--color-payouts)" stopOpacity={0.2}/>
                         <stop offset="95%" stopColor="var(--color-payouts)" stopOpacity={0}/>
                       </linearGradient>
+                      <linearGradient id="colorPremiums" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                      </linearGradient>
                     </defs>
                     <XAxis dataKey="name" stroke="#888888" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} />
                     <YAxis stroke="#888888" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
                     <Tooltip content={<ChartTooltipContent />} />
+                    <Area type="monotone" dataKey="premiums" stroke="#22c55e" fillOpacity={1} fill="url(#colorPremiums)" strokeWidth={2} strokeDasharray="4 4" />
                     <Area type="monotone" dataKey="payouts" stroke="var(--color-payouts)" fillOpacity={1} fill="url(#colorPayout)" strokeWidth={4} />
                   </AreaChart>
                 </ChartContainer>
@@ -293,28 +336,33 @@ export default function AdminPage() {
             </Card>
 
             <div className="space-y-8">
-              <Card className="shadow-2xl border-none bg-primary text-white overflow-hidden relative h-[280px] rounded-[2.5rem] p-4">
+              {/* Loss Ratio Detailed Card */}
+              <Card className="shadow-2xl border-none bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 text-white overflow-hidden relative rounded-[2.5rem] p-4">
                 <div className="absolute top-0 right-0 p-10 opacity-10">
-                  <Activity className="h-40 w-40" />
+                  <Gauge className="h-40 w-40" />
                 </div>
                 <CardHeader>
-                  <CardTitle className="text-white text-xl font-black tracking-tight">AI Risk Signal</CardTitle>
-                  <CardDescription className="text-white/60 font-bold uppercase tracking-widest text-[10px]">Next 72 Hours Forecast</CardDescription>
+                  <CardTitle className="text-white text-xl font-black tracking-tight">Loss Ratio Analysis</CardTitle>
+                  <CardDescription className="text-white/60 font-bold uppercase tracking-widest text-[10px]">Premiums vs Claims Paid</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4 pt-4">
-                  <div className="flex items-center justify-between p-4 bg-white/10 rounded-2xl backdrop-blur-xl border border-white/5">
-                    <div className="flex items-center gap-3">
-                      <div className="h-2 w-2 rounded-full bg-red-400 animate-pulse shadow-[0_0_10px_rgba(248,113,113,0.5)]"></div>
-                      <p className="text-sm font-black tracking-tight">Mumbai Heavy Rain</p>
-                    </div>
-                    <span className="text-[10px] font-black text-red-100 bg-red-500/20 px-2.5 py-1 rounded-full border border-red-500/20">92% CONF.</span>
+                <CardContent className="space-y-4 pt-2">
+                  <div className="text-center py-2">
+                    <p className="text-6xl font-black tracking-tighter">34.2%</p>
+                    <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest mt-2">Current Loss Ratio</p>
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-white/10 rounded-2xl backdrop-blur-xl border border-white/5">
-                    <div className="flex items-center gap-3">
-                      <div className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_10px_rgba(251,146,60,0.5)]"></div>
-                      <p className="text-sm font-black tracking-tight">Delhi Heat Surge</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xl border border-white/5 text-center">
+                      <p className="text-lg font-black">₹18.2L</p>
+                      <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest">Premiums</p>
                     </div>
-                    <span className="text-[10px] font-black text-orange-100 bg-orange-500/20 px-2.5 py-1 rounded-full border border-orange-500/20">74% CONF.</span>
+                    <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xl border border-white/5 text-center">
+                      <p className="text-lg font-black">₹6.2L</p>
+                      <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest">Claims Paid</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/10 p-3 rounded-xl border border-white/5">
+                    <TrendingDown className="h-4 w-4 text-green-300" />
+                    <p className="text-[11px] font-bold text-white/80">Loss ratio improved by 2.1% vs last week due to AI fraud prevention.</p>
                   </div>
                 </CardContent>
               </Card>
@@ -367,20 +415,21 @@ export default function AdminPage() {
                 <CardTitle className="flex items-center gap-2 text-xl font-black font-headline">
                   <BrainCircuit className="h-6 w-6 text-primary" /> Cognitive Fraud Shield
                 </CardTitle>
-                <CardDescription className="text-sm font-medium">Real-time anomaly detection logs</CardDescription>
+                <CardDescription className="text-sm font-medium">AI-powered anomaly detection — GPS spoofing, fake weather, duplicates</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 pt-6">
                 {[
-                  { id: 'WKR-891', type: 'Location Spoofing', risk: 'Critical', status: 'Blocked' },
-                  { id: 'WKR-452', type: 'Synthetic Data', risk: 'High', status: 'Blocked' },
-                  { id: 'WKR-112', type: 'Dup-Identity', risk: 'Medium', status: 'Flagged' },
+                  { id: 'WKR-891', type: 'GPS Spoofing', risk: 'Critical', status: 'Blocked', detail: 'Location jumped 15km in 2min' },
+                  { id: 'WKR-452', type: 'Fake Weather Claim', risk: 'High', status: 'Blocked', detail: 'Historical data shows clear skies' },
+                  { id: 'WKR-223', type: 'Duplicate Claim', risk: 'High', status: 'Blocked', detail: 'Same event claimed twice in 1hr' },
+                  { id: 'WKR-112', type: 'Activity Mismatch', risk: 'Medium', status: 'Flagged', detail: 'Worker inactive during claimed period' },
                 ].map((fraud, i) => (
                   <div key={i} className="flex items-center justify-between p-4 bg-muted/20 dark:bg-muted/5 rounded-2xl group transition-all hover:bg-muted/40">
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center font-black text-[10px]">AI</div>
                       <div>
                         <p className="text-sm font-black tracking-tight text-primary">{fraud.type}</p>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">UID: {fraud.id} • Risk: {fraud.risk}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">UID: {fraud.id} • {fraud.detail}</p>
                       </div>
                     </div>
                     <Badge className={fraud.status === 'Blocked' ? 'bg-red-500/10 text-red-500 border-none font-black text-[10px] uppercase tracking-widest px-3' : 'bg-orange-500/10 text-orange-500 border-none font-black text-[10px] uppercase tracking-widest px-3'}>
@@ -415,6 +464,169 @@ export default function AdminPage() {
           </div>
         </TabsContent>
 
+        {/* ========== PREDICTIVE ANALYTICS TAB ========== */}
+        <TabsContent value="predictive" className="space-y-8 focus-visible:ring-0">
+          {/* Predictive Header */}
+          <Card className="shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-primary via-primary to-violet-700 text-white p-8">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black tracking-tight">Predictive Analytics Engine</h2>
+                <p className="text-white/60 font-medium text-sm max-w-lg">
+                  AI-powered forecast of next week&apos;s likely weather and disruption claims across all 6 monitored cities. Uses historical patterns, seasonal data, and live forecast APIs.
+                </p>
+              </div>
+              <Badge className="bg-white/10 text-white/80 border-white/10 font-black text-[10px] uppercase tracking-widest px-4 py-2">
+                <Activity className="h-3 w-3 mr-1.5 animate-pulse" /> Live Model
+              </Badge>
+            </div>
+            <div className="grid grid-cols-3 gap-4 mt-8">
+              <div className="bg-white/10 p-5 rounded-2xl backdrop-blur-xl border border-white/5">
+                <p className="text-3xl font-black">371</p>
+                <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Expected Claims Next Week</p>
+              </div>
+              <div className="bg-white/10 p-5 rounded-2xl backdrop-blur-xl border border-white/5">
+                <p className="text-3xl font-black">₹2.01L</p>
+                <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Estimated Payouts</p>
+              </div>
+              <div className="bg-white/10 p-5 rounded-2xl backdrop-blur-xl border border-white/5">
+                <p className="text-3xl font-black">3/6</p>
+                <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Cities At High Risk</p>
+              </div>
+            </div>
+          </Card>
+
+          {/* City-Wise Disruption Forecast Table */}
+          <Card className="shadow-2xl border-none rounded-[2.5rem] bg-white/50 dark:bg-black/20 backdrop-blur-2xl overflow-hidden">
+            <CardHeader className="p-8">
+              <CardTitle className="text-2xl font-black font-headline tracking-tight flex items-center gap-3">
+                <MapPin className="h-6 w-6 text-primary" /> City-Wise Disruption Forecast
+              </CardTitle>
+              <CardDescription>Next week&apos;s likely weather/disruption claims by city with AI confidence scores</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow className="hover:bg-transparent border-muted/20">
+                    <TableHead className="font-black uppercase tracking-widest text-[10px] pl-8">City</TableHead>
+                    <TableHead className="font-black uppercase tracking-widest text-[10px]">Predicted Risk</TableHead>
+                    <TableHead className="font-black uppercase tracking-widest text-[10px]">AI Confidence</TableHead>
+                    <TableHead className="font-black uppercase tracking-widest text-[10px]">Est. Claims</TableHead>
+                    <TableHead className="font-black uppercase tracking-widest text-[10px]">Est. Payout</TableHead>
+                    <TableHead className="font-black uppercase tracking-widest text-[10px]">Trend</TableHead>
+                    <TableHead className="font-black uppercase tracking-widest text-[10px] pr-8 text-right">Risk Level</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {predictiveData.map((city, i) => (
+                    <TableRow key={i} className="hover:bg-primary/5 transition-colors border-muted/10">
+                      <TableCell className="py-5 pl-8">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                            <MapPin className="h-4 w-4" />
+                          </div>
+                          <p className="font-black text-sm">{city.city}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-xs font-bold">{city.riskType}</p>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Progress value={city.probability} className="h-2 w-16" />
+                          <span className="text-xs font-black">{city.probability}%</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-sm font-black">{city.expectedClaims}</p>
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-sm font-black text-primary">₹{city.estimatedPayout.toLocaleString('en-IN')}</p>
+                      </TableCell>
+                      <TableCell>
+                        {city.trend === 'up' ? (
+                          <Badge className="bg-red-500/10 text-red-500 border-none text-[9px] font-black uppercase gap-1">
+                            <TrendingUp className="h-3 w-3" /> Rising
+                          </Badge>
+                        ) : city.trend === 'down' ? (
+                          <Badge className="bg-green-500/10 text-green-500 border-none text-[9px] font-black uppercase gap-1">
+                            <TrendingDown className="h-3 w-3" /> Falling
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-blue-500/10 text-blue-500 border-none text-[9px] font-black uppercase gap-1">
+                            Stable
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="pr-8 text-right">
+                        <Badge className={`${getRiskColor(city.riskLevel)} border font-black text-[10px] uppercase tracking-widest px-3`}>
+                          {city.riskLevel}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Loss Ratio Weekly Trend */}
+          <div className="grid lg:grid-cols-2 gap-8">
+            <Card className="shadow-2xl border-none rounded-[2.5rem] bg-white/50 dark:bg-black/20 backdrop-blur-2xl p-6">
+              <CardHeader>
+                <CardTitle className="text-xl font-black font-headline tracking-tight flex items-center gap-2">
+                  <Gauge className="h-5 w-5 text-primary" /> Loss Ratio Weekly Trend
+                </CardTitle>
+                <CardDescription className="font-medium">6-week loss ratio trend showing premiums vs claims efficiency</CardDescription>
+              </CardHeader>
+              <CardContent className="h-[300px] pt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={lossRatioTrend}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                    <XAxis dataKey="week" stroke="#888" fontSize={10} fontWeight="900" />
+                    <YAxis stroke="#888" fontSize={10} fontWeight="900" tickFormatter={(v) => `${v}%`} />
+                    <Tooltip />
+                    <Bar dataKey="lossRatio" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Quick Predictive Alerts */}
+            <Card className="shadow-2xl border-none bg-primary text-white overflow-hidden relative rounded-[2.5rem] p-4">
+              <div className="absolute top-0 right-0 p-10 opacity-10">
+                <Activity className="h-40 w-40" />
+              </div>
+              <CardHeader>
+                <CardTitle className="text-white text-xl font-black tracking-tight">Predictive Risk Alerts</CardTitle>
+                <CardDescription className="text-white/60 font-bold uppercase tracking-widest text-[10px]">Next week&apos;s likely weather/disruption claims</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 pt-4">
+                {predictiveData.filter(d => d.probability >= 50).map((alert, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-white/10 rounded-2xl backdrop-blur-xl border border-white/5">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-2.5 w-2.5 rounded-full ${
+                        alert.riskLevel === 'Critical' ? 'bg-red-400 animate-pulse shadow-[0_0_10px_rgba(248,113,113,0.5)]' :
+                        alert.riskLevel === 'High' ? 'bg-orange-400 shadow-[0_0_10px_rgba(251,146,60,0.5)]' :
+                        'bg-yellow-400'
+                      }`}></div>
+                      <div>
+                        <p className="text-sm font-black tracking-tight">{alert.city} — {alert.riskType}</p>
+                        <p className="text-[10px] text-white/40 font-medium">{alert.expectedClaims} claims expected • ₹{alert.estimatedPayout.toLocaleString('en-IN')}</p>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${
+                      alert.riskLevel === 'Critical' ? 'text-red-100 bg-red-500/20 border-red-500/20' :
+                      alert.riskLevel === 'High' ? 'text-orange-100 bg-orange-500/20 border-orange-500/20' :
+                      'text-yellow-100 bg-yellow-500/20 border-yellow-500/20'
+                    }`}>{alert.probability}% CONF.</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* ========== WORKERS TAB ========== */}
         <TabsContent value="workers" className="space-y-6 focus-visible:ring-0">
           <Card className="shadow-2xl border-none rounded-[2.5rem] bg-white/50 dark:bg-black/20 backdrop-blur-2xl overflow-hidden">
             <CardHeader className="p-8 flex flex-row items-center justify-between">

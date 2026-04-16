@@ -16,6 +16,14 @@
 
 ---
 
+## 📺 Demo Video
+[Watch our full zero-touch parametric claims demo on YouTube](https://youtu.be/coUBDbzubPY)
+
+## 📊 Pitch Deck
+[View the SurakshaPay AI Pitch Deck on Google Drive](https://drive.google.com/file/d/17Lgr3nWMvMdDJV1SGzpeJLnPXD8ClzFv/view?usp=sharing)
+
+---
+
 ## 🚨 The Problem
 
 India's platform-based delivery partners lose **20–30% of their monthly earnings** when extreme weather, pollution, curfews, or sudden zone closures prevent them from working. Currently, there is **no structured safety net** for these uncontrollable events. Traditional insurance is too slow, too paper-heavy, and completely misaligned with the gig economy's pace.
